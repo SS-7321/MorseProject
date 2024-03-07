@@ -1,7 +1,6 @@
 #include <xc.inc>
 	
 global	DAC_Setup, DAC_Int_Hi
-extrn	ADC_Setup, ADC_Read, ADC_Alternate, AMPLH
     
 psect	dac_code, class=CODE
 	
@@ -9,9 +8,6 @@ DAC_Int_Hi:
 	btfss	TMR0IF		; check that this is timer0 interrupt
 	retfie	f		; if not then return
 	incf	LATE, F, A	; increment PORTE
-	movf	AMPLH, W, A	
-	cpfslt	LATE, A
-	clrf	LATE
 	bcf	TMR0IF		; clear interrupt flag
 	retfie	f		; fast return from interrupt
 
