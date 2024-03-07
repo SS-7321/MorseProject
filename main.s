@@ -1,24 +1,42 @@
-	#include <xc.inc>
+#include <xc.inc>
+
+extrn	DAC_Setup, DAC_Int_Hi
+extrn	ADC_Setup, ADC_Read, ADC_Alternate, AMPLH
 
 psect	code, abs
+rst:	org	0x0000	; reset vector
 	
-main:
-	org	0x0
+	bsf	TMR0IE
+	bsf	GIE
 	goto	start
 
-	org	0x100		    ; Main code starts here at address 0x100
-start:
-	movlw 	0x0
-	movwf	TRISB, A	    ; Port C all outputs
-	bra 	test
-loop:
-	movff 	0x06, PORTB
-	incf 	0x06, W, A
-test:
-	movwf	0x06, A	    ; Test for end of loop condition
-	movlw 	0x63
-	cpfsgt 	0x06, A
-	bra 	loop		    ; Not yet finished goto start of loop again
-	goto 	0x0		    ; Re-run program from start
+int_hi:	org	0x0008	; high vector, no low vector
+	goto	DAC_Int_Hi
+	
+start:	call	DAC_Setup
+	call	ADC_Setup
+	clrf	TRISD, A
+;	movlw	0x0F
+;	movwf	PORTD, A
+;	goto	$	; Sit in infinite loop
 
-	end	main
+
+
+loop:	movlw	0x0F
+	movwf	PORTD, A
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	
+	movlw	0x00
+	movwf	PORTD, A
+	
+	call	ADC_Alternate
+	goto	loop	
+	
+end	rst
