@@ -1,7 +1,6 @@
 #include <xc.inc>
     
-global  bt_setup, bt_read_cycle
-global	btn
+global  btn, bt_setup, bt_read_cycle
 
 
 psect	udata_acs   ; reserve data space in access ram
@@ -10,9 +9,7 @@ prev_btn:	    ds	1
 bt_readCounter1:    ds	1
 bt_readCounter2:    ds	1
 bt_readCounter3:    ds	1
-on_cycles:	    ds	1
-off_cycles:	    ds	1
-cycle:
+
 
 psect	button_code,class=CODE
 
@@ -25,6 +22,7 @@ bt_setup:
 	
 bt_reset:
 	clrf	btn	; clears previous value for button
+	clrf	prev_btn
 	return	
 	
 bt_read:
@@ -63,7 +61,7 @@ btrlms:
 	call	bt_and
 	decfsz	bt_readCounter3, F, A
 	goto	btrlms
-	retlw	btn
+	retlw	btn, A
 
 	
 	
