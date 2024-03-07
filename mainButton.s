@@ -35,8 +35,8 @@ loop:	movff	btn, prev_cycle
 check_cycle:
 	movlw	0x00
 	cpfsgt	btn, A	; check if the button is pressed
-	goto cycle_off	; not pressed
-	goto cycle_on	; pressed
+	goto	cycle_off	; not pressed
+	goto	cycle_on	; pressed
 	
 cycle_on:
 	movf	btn, W, A
@@ -50,7 +50,7 @@ cycle_off:
 	movf	btn, W, A
 	cpfseq	prev_cycle, A
 	goto	check_off_length ; code for diff
-	incf	off_cycles
+	incf	check_on_length
 	return
 
 check_off_length:
@@ -62,6 +62,14 @@ check_off_length:
 ;	call	encrypt_data
 ;	call	UART_send
 	clrf	bit_pos
+	return
+	
+check_off_length:
+	movlw	0xF0
+	cpfsgt	on_cycles
+;	goto	enc_dot
+;	goto	enc_dash
+	
 end	rst
 
 
