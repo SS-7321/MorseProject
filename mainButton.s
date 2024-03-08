@@ -8,6 +8,8 @@ prev_cycle: ds	1
 on_cycles:  ds	1
 off_cycle:  ds	1
 bit_pos:    ds	1
+enc_byte:   ds	1
+rand_byte:  ds	1
 
 
 psect	code, abs
@@ -39,16 +41,13 @@ check_cycle:
 	goto	cycle_on	; pressed
 	
 cycle_on:
-	movf	btn, W, A
-	cpfseq	prev_cycle, A
-	nop ; goto code for diff cycles (new input)
 	incf	on_cycles
 	return
 	
 	
 cycle_off:
 	movf	btn, W, A
-	cpfseq	prev_cycle, A
+	cpfseq	prev_cycle, A	;   was the prev cycle off?
 	goto	check_off_length ; code for diff
 	incf	check_on_length
 	return
@@ -61,6 +60,7 @@ check_off_length:
 ;	call	enc_finish
 ;	call	encrypt_data
 ;	call	UART_send
+;	clrf	enc_data
 	clrf	bit_pos
 	return
 	
