@@ -15,20 +15,17 @@ psect	button_code,class=CODE
 
 bt_setup:
 	clrf	TRISH, A    ; sets PORT H for input
-	movlb	0x0F
-	bsf	REPU
 	call	bt_reset
 	return
 	
 bt_reset:
-	clrf	btn	; clears previous value for button
-	clrf	prev_btn
+	clrf	btn	    ; clears value for button
+	clrf	prev_btn    ;clears previous button
 	return	
 	
 bt_read:
-	movf	PORTH, W, A	; reads vlaue of PORT H 
-	movwf	btn		; and saves it to button
-	return
+	movff	PORTH, btn, A	; reads vlaue of PORT H and saves it to button
+	return	; and saves 
 
 bt_and:
 	movf	prev_btn, W, A	;   takes IOR of prev button and current button
@@ -50,15 +47,9 @@ btrlms:
 	decfsz	bt_readCounter1, F, A
 	goto	btrlms
 	
-	movff	prev_btn, btn
-	call	bt_read
-	call	bt_and
 	decfsz	bt_readCounter2, F, A
 	goto	btrlms
 	
-	movff	prev_btn, btn
-	call	bt_read
-	call	bt_and
 	decfsz	bt_readCounter3, F, A
 	goto	btrlms
 	retlw	btn, A
