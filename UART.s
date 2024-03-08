@@ -1,9 +1,10 @@
 #include <xc.inc>
     
-global  UART_Setup, UART_Transmit_Message
+global  UART_Setup, UART_Transmit_Message, m_byte
 
 psect	udata_acs   ; reserve data space in access ram
 UART_counter: ds    1	    ; reserve 1 byte for variable UART_counter
+m_byte:	ds  1
 
 psect	uart_code,class=CODE
 UART_Setup:
@@ -16,10 +17,17 @@ UART_Setup:
     movwf   SPBRG1, A	; set baud rate
     bsf	    TRISC, PORTC_TX1_POSN, A	; TX1 pin is output on RC6 pin
 					; must set TRISC6 to 1
+    
+    bsf	    RC1IE		; interrupt
+    bsf	    CREN		; Receiving bit
+    bsf	    GIE
+    bsf	    PEIE
+    
     return
 
 UART_Transmit_Message:	    ; Message stored at FSR2, length stored in W
     movwf   UART_counter, A
+
 UART_Loop_message:
     movf    POSTINC2, W, A
     call    UART_Transmit_Byte
@@ -33,4 +41,6 @@ UART_Transmit_Byte:	    ; Transmits byte stored in W
     movwf   TXREG1, A
     return
 
-
+UART_Int:
+    movff    RCREG1, m_byte, A	; move value from register to m_byte
+    retfie	f		; fast return from interrupt
