@@ -1,5 +1,7 @@
 #include <xc.inc>
 ; edited
+
+
 extrn	btn, bt_setup, bt_read_cycle	; methods
 extrn	LCD_Setup
     
@@ -10,6 +12,7 @@ off_cycle:  ds	1
 bit_pos:    ds	1
 enc_byte:   ds	1
 rand_byte:  ds	1
+new_char_bool:    ds	1
 
 
 psect	code, abs
@@ -26,8 +29,8 @@ start:	call	btn_setup
 	
 
 
-loop:	movff	btn, prev_cycle
-	call	btn_read_cycle
+loop:	movff	btn, prev_cycle	;   new read cycle, move current to prev
+	call	btn_read_cycle	;   check current state
 	call	check_cycle
 	
 	
@@ -35,41 +38,66 @@ loop:	movff	btn, prev_cycle
 	goto	loop
 
 check_cycle:
-	movlw	0x00
-	cpfsgt	btn, A	; check if the button is pressed
-	goto	cycle_off	; not pressed
-	goto	cycle_on	; pressed
+	tstfsz	btn, A	    ;	check if the button is pressed
+	goto	cycle_on    ;	pressed
+	goto	cycle_off   ;	not pressed
+	
 	
 cycle_on:
 	incf	on_cycles
+	tstfsz	new_char_bool, A
+	clrf	new_char_bool, A
 	return
 	
 	
 cycle_off:
-	movf	btn, W, A
-	cpfseq	prev_cycle, A	;   was the prev cycle off?
-	goto	check_off_length ; code for diff
-	incf	check_on_length
+    	incf	off_cycles
+;   was the prev cycle off?
+	tstfsz	prev_cycle, A
+;   if prev on:
+	goto	check_on_length	    ;	just finished input, goto encode result
+;   if prev off:
+	goto	check_off_length    ;	prev cycle was not off, encode prev input
 	return
 
 check_off_length:
-	movlw	0xF0	; check if off cycles long enough for a new char input
+;   is pause long enough for new character?
+	movlw	0xF0
 	cpfsgt	off_cycles, A
 	return	;   return if not a new character
-	;   if long enough:
-;	call	enc_finish
-;	call	encrypt_data
+;   if long enough:
+;   encrypted a byte before during this pause?
+	tstfsz	new_char_bool, A
+	return
+;   if not encrypted before:
+	call	enc_finish
+;	call	encrypt
 ;	call	UART_send
-;	clrf	enc_data
-	clrf	bit_pos
+	clrf	enc_byte
+	setf	new_char_bool, A
 	return
 	
-check_off_length:
+check_on_length:
+;   is prev input dot or dash?
 	movlw	0xF0
-	cpfsgt	on_cycles
-;	goto	enc_dot
-;	goto	enc_dash
+	cpfsgt	on_cycles, A
+	call	enc_dot
+	call	enc_dash
+	clrf	on_cycles
+	return
+
+enc_dash:
+	bsf	enc_byte, bit_pos, A
+	incf	bit_pos, F, A
+	return
+enc_dot:
+	incf	bit_pos, F, A
+	return
 	
+enc_finish:
+	bsf	enc_byte, bit_pos, A
+	clrf	bit_pos, A
+	return
 end	rst
 
 
