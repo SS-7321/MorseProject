@@ -290,7 +290,7 @@ bt_dec_ERROR:
 
 bt_to_LCD:	
 	call	bt_dec_A
-	call	LCD_Send_Byte_D
+;	call	LCD_Send_Byte_D
 	return
 	
 	end
