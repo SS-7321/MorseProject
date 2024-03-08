@@ -1,9 +1,9 @@
 #include <xc.inc>
 ;editted
 global	bt_dec_A
-    
-PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
-m_byte:	    ds 1
+extrn	m_byte	; byte from UART
+extrn	LCD_Send_Byte_D
+
 
 psect	decode_code, class=CODE
     
