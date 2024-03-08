@@ -49,10 +49,8 @@ btrlms:
 	
 	decfsz	bt_readCounter2, F, A
 	goto	btrlms
-	
-	;decfsz	bt_readCounter3, F, A
-	;goto	btrlms
-	retlw	btn, A
+	movf	btn, W, A
+	return
 
 	
 	
