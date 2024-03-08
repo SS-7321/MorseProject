@@ -8,7 +8,7 @@ btn:		    ds	1	    ; reserve 1 byte
 prev_btn:	    ds	1
 bt_readCounter1:    ds	1
 bt_readCounter2:    ds	1
-bt_readCounter3:    ds	1
+;bt_readCounter3:    ds	1
 
 
 psect	button_code,class=CODE
@@ -34,12 +34,12 @@ bt_and:
 
 bt_read_cycle:		    ; reads PORT H for a specific amount of time
 	call	bt_reset
-	movlw	0x01
-	movwf	bt_readCounter2, A
-	movlw	0x01
-	movwf	bt_readCounter3, A
-	movlw	0x01
+	movlw	0xFF
 	movwf	bt_readCounter1, A
+	;movlw	0xFF
+	movwf	bt_readCounter2, A
+	;movlw	0x01
+	;movwf	bt_readCounter1, A
 btrlms:
 	movff	prev_btn, btn, A
 	call	bt_read
@@ -50,8 +50,8 @@ btrlms:
 	decfsz	bt_readCounter2, F, A
 	goto	btrlms
 	
-	decfsz	bt_readCounter3, F, A
-	goto	btrlms
+	;decfsz	bt_readCounter3, F, A
+	;goto	btrlms
 	retlw	btn, A
 
 	
