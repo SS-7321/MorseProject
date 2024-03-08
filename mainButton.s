@@ -3,12 +3,12 @@
 
 
 extrn	btn, bt_setup, bt_read_cycle	; methods
-extrn	LCD_Setup
+extrn	LCD_Setup, LCD_Send_Byte_D
     
 psect	udata_acs   ; reserve data space in access ram
 prev_cycle: ds	1
 on_cycles:  ds	1
-off_cycle:  ds	1
+off_cycles:  ds	1
 bit_pos:    ds	1
 enc_byte:   ds	1
 rand_byte:  ds	1
@@ -22,15 +22,15 @@ rst:	org	0x0000	; reset vector
 	goto	start
 
 int_hi:	org	0x0008	; high vector, no low vector
-	goto	DAC_Int_Hi
+
 	
-start:	call	btn_setup
-	call	LCD_setup
+start:	call	bt_setup
+	call	LCD_Setup
 	
 
 
 loop:	movff	btn, prev_cycle	;   new read cycle, move current to prev
-	call	btn_read_cycle	;   check current state
+	call	bt_read_cycle	;   check current state
 	call	check_cycle
 	
 	
@@ -97,6 +97,7 @@ enc_dot:
 enc_finish:
 	bsf	enc_byte, bit_pos, A
 	clrf	bit_pos, A
+	movf	enc_byte, W, A
 	return
 end	rst
 
