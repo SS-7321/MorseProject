@@ -4,9 +4,9 @@
 
 extrn	btn, bt_setup, bt_read_cycle	; methods
 extrn	LCD_Setup, LCD_Send_Byte_D
-extrn	bt_dec_A
+extrn	bt_dec_A, bt_to_LCD, dec_setup
     
-global	m_byte, do_send, enc_byte
+global	m_byte, do_send, enc_byte, on_cycles, off_cycles
     
 psect	udata_acs   ; reserve data space in access ram
 prev_cycle: ds	1
@@ -30,6 +30,7 @@ int_hi:	org	0x0008	; high vector, no low vector
 	
 start:	
         call	bt_setup
+	call	dec_setup
 	call	LCD_Setup
 	call	reset_vals
 	goto	loop
@@ -39,6 +40,7 @@ reset_vals:
 	movlw	0x01
 	movwf	bit_pos, A
 	clrf	enc_byte
+	clrf	on_cycles
 	clrf	do_send
 	return
 
@@ -59,6 +61,7 @@ check_cycle:
 	
 cycle_on:
 	incf	on_cycles
+	clrf	off_cycles
 	setf	do_send, A
 	return
 	
@@ -75,7 +78,7 @@ cycle_off:
 
 check_off_length:
 ;   is pause long enough for new character?
-	movlw	20
+	movlw	30
 	cpfsgt	off_cycles, A
 	return	;   return if not a new character
 ;   if long enough:
@@ -97,31 +100,34 @@ check_on_length:
 ;   is prev input dot or dash?
 	movlw	12  ;	dash if 12 cycles long (12x20ms)
 	cpfsgt	on_cycles, A
-	call	enc_dot
-	call	enc_dash
-	clrf	on_cycles
+	goto	enc_dot
+	goto	enc_dash
+	
 	return
 
 enc_dash:
 	movf	bit_pos, W, A
 	xorwf	enc_byte, F, A
 	rlncf	bit_pos, F, A
+	clrf	on_cycles
+
+	
 	return
 enc_dot:
+	movf	bit_pos, W, A
+	andwf	enc_byte, F, A
 	rlncf	bit_pos, F, A
+	clrf	on_cycles
 	return
 	
 enc_finish:
 ;   set the identifier bit
 	movf	bit_pos, W, A
 	xorwf	enc_byte, F, A
-	rlncf	bit_pos, F, A
-
 ;   mov encoded byte to Wreg
 	movf	enc_byte, W, A
 	movff	enc_byte, m_byte, A
-	call	bt_dec_A
-	call	LCD_Send_Byte_D
+	call	bt_to_LCD
 	call	reset_vals
 	return
 end	rst
