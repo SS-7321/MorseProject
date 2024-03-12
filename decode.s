@@ -1,6 +1,6 @@
 #include <xc.inc>
 ;editted
-global	bt_dec_A
+global	bt_dec_A, Cursor_counter, bt_to_LCD, dec_setup
 extrn	m_byte	; byte from UART
 extrn	LCD_Send_Byte_D, LCD_clear, LCD_secondLine
 
@@ -9,7 +9,8 @@ Cursor_counter:	ds 1
 
 psect	decode_code, class=CODE
     
-
+dec_setup:
+	clrf    Cursor_counter
     
 bt_dec_A:
 	movlw	0x05		;A
@@ -292,17 +293,20 @@ bt_dec_ERROR:
 
 bt_to_LCD:	
 	call	bt_dec_A
-	incf	Cursor_counter, f
+	call	LCD_Send_Byte_D
+	incf	Cursor_counter, f, a
 	movlw	0x10
 	cpfseq	Cursor_counter, a
 	goto	cont
 	call	LCD_secondLine
+	
 cont:	movlw	0x20
 	cpfseq	Cursor_counter, a
-	goto	cont2
-	call	LCD_clear
-	clrf	Cursor_counter, a	
-cont2:	call	LCD_Send_Byte_D
 	return
+	call	LCD_clear
+	clrf	Cursor_counter, a
+	return
+	
+
 	
 	end
