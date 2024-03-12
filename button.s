@@ -14,17 +14,17 @@ bt_readCounter2:    ds	1
 psect	button_code,class=CODE
 
 bt_setup:
-	clrf	TRISH, A    ; sets PORT H for input
+	setf	TRISE, A	; sets PORT H for input
 	call	bt_reset
 	return
 	
 bt_reset:
-	clrf	btn	    ; clears value for button
-	clrf	prev_btn    ;clears previous button
+	clrf	btn, A		; clears value for button
+	clrf	prev_btn, A	;clears previous button
 	return	
 	
 bt_read:
-	movff	PORTH, btn, A	; reads vlaue of PORT H and saves it to button
+	movff	PORTE, btn	; reads vlaue of PORT H and saves it to button
 	return	; and saves 
 
 bt_and:
@@ -41,7 +41,7 @@ bt_read_cycle:		    ; reads PORT H for a specific amount of time
 	;movlw	0x01
 	;movwf	bt_readCounter1, A
 btrlms:
-	movff	prev_btn, btn, A
+	movff	btn, prev_btn, A
 	call	bt_read
 	call	bt_and
 	decfsz	bt_readCounter1, F, A
