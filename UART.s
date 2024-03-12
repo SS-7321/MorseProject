@@ -42,5 +42,8 @@ UART_Transmit_Byte:	    ; Transmits byte stored in W
     return
 
 UART_Int:
-    movff    RCREG1, m_byte, A	; move value from register to m_byte
-    retfie	f		; fast return from interrupt
+    btfss   RC1IF		; check that flag bit is set
+    retfie  f			; if not then return
+    movff   RCREG1, m_byte, A	; move value from register to m_byte
+    bcf	    RC1IF		; clear interrupt flag
+    retfie  f			; fast return from interrupt
