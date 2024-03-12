@@ -2,11 +2,11 @@
 ; edited
 
 
-extrn	btn, bt_setup, bt_read_cycle	; methods
+extrn	btn, bt_setup, bt_read_cycle	
 extrn	LCD_Setup, LCD_Send_Byte_D
-extrn	bt_dec_A, bt_to_LCD, dec_setup
+extrn	bt_to_LCD, dec_setup
     
-global	m_byte, do_send, enc_byte, on_cycles, off_cycles
+global	key, enc_byte, m_byte
     
 psect	udata_acs   ; reserve data space in access ram
 prev_cycle: ds	1
@@ -17,6 +17,7 @@ enc_byte:   ds	1
 rand_byte:  ds	1
 do_send:    ds	1
 m_byte:	    ds	1
+key:	    ds	1
 
 
 psect	code, abs
