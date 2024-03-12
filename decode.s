@@ -2,8 +2,10 @@
 ;editted
 global	bt_dec_A
 extrn	m_byte	; byte from UART
-extrn	LCD_Send_Byte_D
+extrn	LCD_Send_Byte_D, LCD_clear, LCD_secondLine
 
+psect	udata_acs   ; reserve data space in access ram
+Cursor_counter:	ds 1
 
 psect	decode_code, class=CODE
     
@@ -290,7 +292,17 @@ bt_dec_ERROR:
 
 bt_to_LCD:	
 	call	bt_dec_A
-;	call	LCD_Send_Byte_D
+	incf	Cursor_counter, f
+	movlw	0x10
+	cpfseq	Cursor_counter, a
+	goto	cont
+	call	LCD_secondLine
+cont:	movlw	0x20
+	cpfseq	Cursor_counter, a
+	goto	cont2
+	call	LCD_clear
+	clrf	Cursor_counter, a	
+cont2:	call	LCD_Send_Byte_D
 	return
 	
 	end
