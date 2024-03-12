@@ -306,6 +306,8 @@ cont:	movlw	0x20
 	call	LCD_clear
 	clrf	Cursor_counter, a
 	return
+
+Decrypt:
 	
 
 	
