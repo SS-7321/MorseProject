@@ -1,7 +1,7 @@
 #include <xc.inc>
 ;editted
-global	bt_dec_A, Cursor_counter, bt_to_LCD, dec_setup
-extrn	m_byte	; byte from UART
+global	bt_dec_A, Cursor_counter, bt_to_LCD, dec_setup, Decrypt
+extrn	m_byte, byte_higher, byte_lower	; byte from UART
 extrn	LCD_Send_Byte_D, LCD_clear, LCD_secondLine
 
 psect	udata_acs   ; reserve data space in access ram
@@ -292,6 +292,7 @@ bt_dec_ERROR:
 	retlw	0x98		;~
 
 bt_to_LCD:	
+	call	Decrypt
 	call	bt_dec_A
 	call	LCD_Send_Byte_D
 	incf	Cursor_counter, f, a
@@ -308,7 +309,17 @@ cont:	movlw	0x20
 	return
 
 Decrypt:
+	movf	byte_lower, w, a
+	xorwf	byte_higher, f, a
+	movlw	0x10
+	mulwf	byte_higher, a
+	movff	PRODL, m_byte
 	
-
+	movlw	0x10
+	mulwf	byte_lower, a
+	movf	PRODH, W, A
+	addwf	m_byte, F, A
+	
+	return
 	
 	end
