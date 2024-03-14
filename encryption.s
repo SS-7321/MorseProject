@@ -1,7 +1,8 @@
 #include <xc.inc>
 
 extrn	key, enc_byte
-global	ENCL, ENCH, RNG_counter, encrypt_setup
+extrn	UART_Transmit_Byte
+global	ENCL, ENCH, RNG_counter, encrypt_setup, encrypt, RAND
 
 psect	udata_acs
 RNG_counter:	ds  1
@@ -18,8 +19,10 @@ ENCL:	ds  1
 psect	encrypt_code, class=CODE
     
 encrypt_setup:
-    movlw   0xA0
-    movwf   RNG_counter
+	movlw   0xA0
+	movwf   RNG_counter
+	movlw   0x04
+	movwf   ax, A
 	
 
 encrypt_reset:
@@ -40,7 +43,7 @@ mix_rand:	;   mix encoded byte and rnadom number
 	movwf	ENCH, A		;   moves that to ENCH
 	
 	movlw	0x10		;   splits EB into 0E B0
-	mulwf	enc_byte	;
+	mulwf	enc_byte, A	;
 	movf	PRODH, W, A	;   adds 0E to ENCH to get FE
 	addwf	ENCH, F, A	;
 	
@@ -63,8 +66,14 @@ mersenne_twister:
 
 encrypt:
 	call	encrypt_reset
+	call	mersenne_twister
 	call	mix_rand
 	call	xor_LH
+;	movf	ENCL, W, A
+;	call	UART_Transmit_Byte
+;	movf	ENGH, W, A
+;	call	UART_Transmit_Byte
+	
 	return
 	
 end
