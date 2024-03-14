@@ -36,7 +36,7 @@ bt_read_cycle:		    ; reads PORT H for a specific amount of time
 	call	bt_reset
 	movlw	0xFF
 	movwf	bt_readCounter1, A
-	;movlw	0xFF
+	movlw	0xA0
 	movwf	bt_readCounter2, A
 	;movlw	0x01
 	;movwf	bt_readCounter1, A
