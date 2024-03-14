@@ -285,14 +285,21 @@ bt_dec_ds:
 bt_dec_eq:
 	movlw	0x31		;=
 	cpfseq	m_byte,a
-	goto	bt_dec_ERROR
+	goto	bt_dec_space
 	retlw	0x3D
+	
+bt_dec_space:
+	movlw	0xE6
+	cpfseq	m_byte,a
+	goto	bt_dec_ERROR
+	retlw	0x20
+	
 
 bt_dec_ERROR:
 	retlw	0x7E		;~
 
 bt_to_LCD:	
-	;call	Decrypt
+	call	Decrypt
 	call	bt_dec_A
 	call	LCD_Send_Byte_D
 	incf	Cursor_counter, f, a
