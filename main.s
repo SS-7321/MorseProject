@@ -5,6 +5,7 @@
 extrn	btn, bt_setup, bt_read_cycle	
 extrn	LCD_Setup, LCD_Send_Byte_D
 extrn	bt_to_LCD, dec_setup
+extrn	RNG_counter
     
 global	key, enc_byte, m_byte
     
@@ -62,6 +63,7 @@ check_cycle:
 	
 cycle_on:
 	incf	on_cycles
+	incf	RNG_counter
 	clrf	off_cycles
 	setf	do_send, A
 	return
@@ -79,7 +81,7 @@ cycle_off:
 
 check_off_length:
 ;   is pause long enough for new character?
-	movlw	12
+	movlw	10
 	cpfsgt	off_cycles, A
 	return	;   return if not a new character
 ;   if long enough:
@@ -100,7 +102,7 @@ wrap:
 	
 check_on_length:
 ;   is prev input dot or dash?
-	movlw	6  ;	dash if 12 cycles long (12x20ms)
+	movlw	5  ;	dash if 12 cycles long (12x20ms)
 	cpfsgt	on_cycles, A
 	goto	enc_dot
 	goto	enc_dash
