@@ -1,10 +1,12 @@
 #include <xc.inc>
-    
-global  UART_Setup, UART_Transmit_Message, m_byte
+extrn	m_byte
+global  UART_Setup, UART_Transmit_Message, m_byte, byte_higher, byte_lower
 
 psect	udata_acs   ; reserve data space in access ram
-UART_counter: ds    1	    ; reserve 1 byte for variable UART_counter
-m_byte:	ds  1
+UART_counter:	ds  1	    ; reserve 1 byte for variable UART_counter
+byte_higher:	ds  1
+byte_lower:	ds  1
+;m_byte:	ds  1
 
 psect	uart_code,class=CODE
 UART_Setup:
@@ -15,10 +17,10 @@ UART_Setup:
     bcf	    BRG16	; 8-bit generator only
     movlw   103		; gives 9600 Baud rate (actually 9615)
     movwf   SPBRG1, A	; set baud rate
-    bsf	    TRISC, PORTC_TX1_POSN, A	; TX1 pin is output on RC6 pin
-					; must set TRISC6 to 1
+    bsf	    TRISG, PORTG_TX2_POSN, A	; TX1 pin is output on RG6 pin
+					; must set TRISG6 to 1
     
-    bsf	    RC1IE		; interrupt
+    bsf	    RC2IE		; interrupt
     bsf	    CREN		; Receiving bit
     bsf	    GIE
     bsf	    PEIE
