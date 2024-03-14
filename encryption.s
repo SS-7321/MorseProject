@@ -10,6 +10,9 @@ ENCL:	ds  1
     
     
 psect	encrypt_code, class=CODE
+    
+encrypt_setup:
+    
 
 encrypt_reset:
 	clrf	RAND
