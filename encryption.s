@@ -1,18 +1,26 @@
 #include <xc.inc>
 
 extrn	key, enc_byte
-global	ENCL, ENCH
-    
-PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
+global	ENCL, ENCH, RNG_counter, encrypt_setup
+
+psect	udata_acs
+RNG_counter:	ds  1
+ax:	ds  1
 RAND:	ds  1
+
+PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
+
 ENCH:	ds  1
 ENCL:	ds  1
-    
+
+
     
 psect	encrypt_code, class=CODE
     
 encrypt_setup:
-    
+    movlw   0xA0
+    movwf   RNG_counter
+	
 
 encrypt_reset:
 	clrf	RAND
@@ -45,7 +53,14 @@ xor_LH:		;   XOR FE with BA
 	xorwf	ENCH, F, A
 	return
 	
-	
+mersenne_twister:
+	movf	ax, W, A
+	mulwf	RAND, A
+	movff	PRODL, RAND
+	movf	RNG_counter, W, A
+	addwf	RAND, F, A
+	return
+
 encrypt:
 	call	encrypt_reset
 	call	mix_rand
