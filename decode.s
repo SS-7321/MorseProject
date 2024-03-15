@@ -3,6 +3,7 @@
 global	bt_dec_A, Cursor_counter, bt_to_LCD, dec_setup, Decrypt
 extrn	m_byte, byte_higher, byte_lower	; byte from UART
 extrn	LCD_Send_Byte_D, LCD_clear, LCD_secondLine
+extrn	UART_Transmit_Byte
 
 psect	udata_acs   ; reserve data space in access ram
 Cursor_counter:	ds 1
@@ -109,7 +110,7 @@ bt_dec_P:
 	retlw	0x50
 
 bt_dec_Q:
-	movlw	0x18		;Q
+	movlw	0x1B		;Q
 	cpfseq	m_byte,a
 	goto	bt_dec_R
 	retlw	0x51
@@ -289,7 +290,7 @@ bt_dec_eq:
 	retlw	0x3D
 	
 bt_dec_space:
-	movlw	0xE6
+	movlw	0xFF
 	cpfseq	m_byte,a
 	goto	bt_dec_ERROR
 	retlw	0x20
@@ -301,6 +302,7 @@ bt_dec_ERROR:
 bt_to_LCD:	
 	call	Decrypt
 	call	bt_dec_A
+	;call	UART_Transmit_Byte
 	call	LCD_Send_Byte_D
 	incf	Cursor_counter, f, a
 	movlw	0x10
