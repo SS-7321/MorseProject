@@ -2,7 +2,7 @@
 
 extrn	key, enc_byte
 extrn	UART_Transmit_Byte
-global	ENCL, ENCH, RNG_counter, encrypt_setup, encrypt, RAND
+global	ENCL, ENCH, encrypt_setup, encrypt, RNG_counter
 
 psect	udata_acs
 RNG_counter:	ds  1
@@ -69,10 +69,10 @@ encrypt:
 	call	mersenne_twister
 	call	mix_rand
 	call	xor_LH
-;	movf	ENCL, W, A
-;	call	UART_Transmit_Byte
-;	movf	ENGH, W, A
-;	call	UART_Transmit_Byte
+	movf	ENCL, W, A
+	call	UART_Transmit_Byte
+	movf	ENCH, W, A
+	call	UART_Transmit_Byte
 	
 	return
 	
