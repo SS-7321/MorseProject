@@ -8,13 +8,13 @@ btn:		    ds	1	    ; reserve 1 byte
 prev_btn:	    ds	1
 bt_readCounter1:    ds	1
 bt_readCounter2:    ds	1
-;bt_readCounter3:    ds	1
 
 
 psect	button_code,class=CODE
 
 bt_setup:
-	setf	TRISE, A	; sets PORT H for input
+	
+	setf	TRISD, A	; sets PORT H for input
 	call	bt_reset
 	return
 	
@@ -24,7 +24,7 @@ bt_reset:
 	return	
 	
 bt_read:
-	movff	PORTE, btn	; reads vlaue of PORT H and saves it to button
+	movff	PORTD, btn	; reads vlaue of PORT H and saves it to button
 	return	; and saves 
 
 bt_and:
@@ -34,16 +34,16 @@ bt_and:
 
 bt_read_cycle:		    ; reads PORT H for a specific amount of time
 	call	bt_reset
+	
 	movlw	0xFF
 	movwf	bt_readCounter1, A
 	movlw	0x90
 	movwf	bt_readCounter2, A
-	;movlw	0x01
-	;movwf	bt_readCounter1, A
 btrlms:
 	movff	btn, prev_btn, A
 	call	bt_read
 	call	bt_and
+	
 	decfsz	bt_readCounter1, F, A
 	goto	btrlms
 	
