@@ -1,12 +1,12 @@
 #include <xc.inc>
-extrn	m_byte
-global  UART_Setup, UART_Transmit_Message, m_byte, byte_higher, byte_lower
+extrn	bt_to_LCD
+global  UART_Setup, UART_Transmit_Byte, m_byte, byte_higher, byte_lower, UART_Int
 
 psect	udata_acs   ; reserve data space in access ram
 UART_counter:	ds  1	    ; reserve 1 byte for variable UART_counter
 byte_higher:	ds  1
 byte_lower:	ds  1
-;m_byte:	ds  1
+m_byte:	ds  1
 
 psect	uart_code,class=CODE
 UART_Setup:
@@ -17,13 +17,15 @@ UART_Setup:
     bcf	    BRG16	; 8-bit generator only
     movlw   103		; gives 9600 Baud rate (actually 9615)
     movwf   SPBRG1, A	; set baud rate
-    bsf	    TRISG, PORTG_TX2_POSN, A	; TX1 pin is output on RG6 pin
+    bsf	    TRISC, PORTC_TX1_POSN, A	; TX1 pin is output on RG6 pin
 					; must set TRISG6 to 1
-    
-    bsf	    RC2IE		; interrupt
-    bsf	    CREN		; Receiving bit
-    bsf	    GIE
-    bsf	    PEIE
+
+    bsf	    TRISC6, a
+    bsf	    TRISC7, a
+    bsf	    RC1IE		; interrupt
+    bsf	    CREN		; enable data recption
+    bsf	    GIE			; Global interrupt enable bit
+    bsf	    PEIE		; Peripherals interrupt enable bit
     
     return
 
@@ -47,5 +49,6 @@ UART_Int:
     btfss   RC1IF		; check that flag bit is set
     retfie  f			; if not then return
     movff   RCREG1, m_byte, A	; move value from register to m_byte
+    call    bt_to_LCD
     bcf	    RC1IF		; clear interrupt flag
-    retfie  f			; fast return from interrupt
+    retfie  f			; fast return from interrupts
