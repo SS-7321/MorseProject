@@ -18,7 +18,6 @@ on_cycles:  ds	1
 off_cycles: ds	1
 bit_pos:    ds	1
 enc_byte:   ds	1
-rand_byte:  ds	1
 do_send:    ds	1
 key:	    ds	1
 
