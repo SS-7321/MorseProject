@@ -300,7 +300,7 @@ bt_dec_ERROR:
 	retlw	0x7E		;~
 
 bt_to_LCD:	
-	call	Decrypt
+	;call	Decrypt
 	call	bt_dec_A
 	;call	UART_Transmit_Byte
 	call	LCD_Send_Byte_D
