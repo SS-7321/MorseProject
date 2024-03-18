@@ -7,6 +7,8 @@ extrn	LCD_Setup, LCD_Send_Byte_D
 extrn	bt_to_LCD, dec_setup
 extrn	RNG_counter, m_byte
 extrn	encrypt, ENCH, ENCL, byte_lower, byte_higher, encrypt_setup
+extrn	buz_setup, buz_start, buz_stop
+extrn	UART_Setup, UART_Transmit_Byte, UART_Int
     
 global	key, enc_byte
     
@@ -28,6 +30,7 @@ rst:	org	0x0000	; reset vector
 	goto	start
 
 int_hi:	org	0x0008	; high vector, no low vector
+	call	UART_Int
 	return
 	
 start:	
@@ -35,6 +38,8 @@ start:
 	call	dec_setup
 	call	LCD_Setup
 	call	encrypt_setup
+	call	buz_setup
+	call	UART_Setup
 	call	reset_vals
 	goto	loop
 	
@@ -63,6 +68,7 @@ check_cycle:
 	
 	
 cycle_on:
+	call	buz_start
 	incf	on_cycles
 	incf	RNG_counter
 	clrf	off_cycles
@@ -71,13 +77,14 @@ cycle_on:
 	
 	
 cycle_off:
+	call	buz_stop
     	incf	off_cycles
 ;   was the prev cycle off?
 	tstfsz	prev_cycle, A
 ;   if prev on:
 	goto	check_on_length	    ;	just finished input, goto encode result
 ;   if prev off:
-	goto	check_off_length    ;	prev cycle was not off, encode prev input
+	goto	check_off_length    ;	prev cycle was on, encode prev input
 	return
 
 check_off_length:
@@ -86,17 +93,21 @@ check_off_length:
 	cpfsgt	off_cycles, A
 	return	;   return if not a new character
 ;   if long enough:
-;   encrypted a byte before during this pause?
+;   encrypted a byte before within this pause?
  	tstfsz	do_send, A
 	goto	wrap
 	return
 	
 wrap:
 ;   if not encrypted before:
+;   set the identifier bit
+	movf	bit_pos, W, A
+	xorwf	enc_byte, F, A
 	call	enc_finish
 	clrf	enc_byte
 	clrf	do_send, A
 	clrf	off_cycles
+	
 	return
 	
 check_on_length:
@@ -106,14 +117,12 @@ check_on_length:
 	goto	dot_dash
 	
 	setf	enc_byte, A
-	movf	bit_pos, F, A
-	xorwf	enc_byte, F, A
 	clrf	on_cycles
 	goto	enc_finish
 	return
 	
 dot_dash:
-	movlw	10      ;	dash if 8 cycles long (12x20ms)
+	movlw	8      ;	dash if 8 cycles long (12x20ms)
 	cpfsgt	on_cycles, A
 	goto	enc_dot
 	goto	enc_dash
@@ -135,16 +144,9 @@ enc_dot:
 	return
 	
 enc_finish:
-;   set the identifier bit
-	movf	bit_pos, W, A
-	xorwf	enc_byte, F, A
+
 ;   move encoded byte to Wreg
 	call	encrypt
-;----------------------------------------------
-	movff	ENCL, byte_lower
-	movff	ENCH, byte_higher
-	call	bt_to_LCD
-;----------------------------------------------
 	call	reset_vals
 	return
 end	rst
