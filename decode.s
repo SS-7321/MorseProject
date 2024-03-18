@@ -1,6 +1,6 @@
 #include <xc.inc>
 ;editted
-global	bt_dec_A, Cursor_counter, bt_to_LCD, dec_setup, Decrypt
+global	ButtonDecodeA, Cursor_counter, ButtonToLCD, DecodeSetup, Decrypt
 extrn	m_byte, byte_higher, byte_lower	; byte from UART
 extrn	LCD_Send_Byte_D, LCD_clear, LCD_secondLine
 extrn	UART_Transmit_Byte
@@ -10,324 +10,324 @@ Cursor_counter:	ds 1
 
 psect	decode_code, class=CODE
     
-dec_setup:
+DecodeSetup:
 	clrf    Cursor_counter
     
-bt_dec_A:
-	movlw	0x06		;A
-	cpfseq	m_byte,a
-	goto	bt_dec_B
-	retlw	0x41
+ButtonDecodeA:
+	movlw	0x06		; byte for A
+	cpfseq	m_byte,a	; compare received value to 'A' byte
+	goto	ButtonDecodeB	; if not same, skips to next value
+	retlw	0x41		; if true, return ascii for 'A'
 	
-bt_dec_B:
+ButtonDecodeB:
 	movlw	0x11		;B
 	cpfseq	m_byte,a
-	goto	bt_dec_C
+	goto	ButtonDecodeC
 	retlw	0x42
 	
-bt_dec_C:
+ButtonDecodeC:
 	movlw	0x15		;C
 	cpfseq	m_byte,a
-	goto	bt_dec_D
+	goto	ButtonDecodeD
 	retlw	0x43
 	
-bt_dec_D:
+ButtonDecodeD:
 	movlw	0x09		;D
 	cpfseq	m_byte,a
-	goto	bt_dec_E
+	goto	ButtonDecodeE
 	retlw	0x44
 	
-bt_dec_E:
+ButtonDecodeE:
 	movlw	0x02		;E
 	cpfseq	m_byte,a
-	goto	bt_dec_F
+	goto	ButtonDecodeF
 	retlw	0x45
 	
-bt_dec_F:
+ButtonDecodeF:
 	movlw	0x14		;F
 	cpfseq	m_byte,a
-	goto	bt_dec_G
+	goto	ButtonDecodeG
 	retlw	0x46
 	
-bt_dec_G:
+ButtonDecodeG:
 	movlw	0x0B		;G
 	cpfseq	m_byte,a
-	goto	bt_dec_H
+	goto	ButtonDecodeH
 	retlw	0x47
 	
-bt_dec_H:
+ButtonDecodeH:
 	movlw	0x10		;H
 	cpfseq	m_byte,a
-	goto	bt_dec_I
+	goto	ButtonDecodeI
 	retlw	0x48
 	
-bt_dec_I:
+ButtonDecodeI:
 	movlw	0x04		;I
 	cpfseq	m_byte,a
-	goto	bt_dec_J
+	goto	ButtonDecodeJ
 	retlw	0x49
 	
-bt_dec_J:
+ButtonDecodeJ:
 	movlw	0x1E		;J
 	cpfseq	m_byte,a
-	goto	bt_dec_K
+	goto	ButtonDecodeK
 	retlw	0x4A
 	
-bt_dec_K:
+ButtonDecodeK:
 	movlw	0x0D		;K
 	cpfseq	m_byte,a
-	goto	bt_dec_L
+	goto	ButtonDecodeL
 	retlw	0x4B
 	
-bt_dec_L:
+ButtonDecodeL:
 	movlw	0x12		;L
 	cpfseq	m_byte,a
-	goto	bt_dec_M
+	goto	ButtonDecodeM
 	retlw	0x4C
 	
-bt_dec_M:
+ButtonDecodeM:
 	movlw	0x07		;M
 	cpfseq	m_byte,a
-	goto	bt_dec_N
+	goto	ButtonDecodeN
 	retlw	0x4D
 	
-bt_dec_N:
+ButtonDecodeN:
 	movlw	0x05		;N
 	cpfseq	m_byte,a
-	goto	bt_dec_O
+	goto	ButtonDecodeO
 	retlw	0x4E
 	
-bt_dec_O:
+ButtonDecodeO:
 	movlw	0x0F		;O
 	cpfseq	m_byte,a
-	goto	bt_dec_P
+	goto	ButtonDecodeP
 	retlw	0x4F
 	
-bt_dec_P:
+ButtonDecodeP:
 	movlw	0x16		;P
 	cpfseq	m_byte,a
-	goto	bt_dec_Q
+	goto	ButtonDecodeQ
 	retlw	0x50
 
-bt_dec_Q:
+ButtonDecodeQ:
 	movlw	0x1B		;Q
 	cpfseq	m_byte,a
-	goto	bt_dec_R
+	goto	ButtonDecodeR
 	retlw	0x51
 
-bt_dec_R:
+ButtonDecodeR:
 	movlw	0x0A		;R
 	cpfseq	m_byte,a
-	goto	bt_dec_S
+	goto	ButtonDecodeS
 	retlw	0x52
 	
-bt_dec_S:
+ButtonDecodeS:
 	movlw	0x08		;S
 	cpfseq	m_byte,a
-	goto	bt_dec_T
+	goto	ButtonDecodeT
 	retlw	0x53
 	
-bt_dec_T:
+ButtonDecodeT:
 	movlw	0x03		;T
 	cpfseq	m_byte,a
-	goto	bt_dec_U
+	goto	ButtonDecodeU
 	retlw	0x54
 	
-bt_dec_U:
+ButtonDecodeU:
 	movlw	0x0C		;U
 	cpfseq	m_byte,a
-	goto	bt_dec_V
+	goto	ButtonDecodeV
 	retlw	0x55
 	
-bt_dec_V:
+ButtonDecodeV:
 	movlw	0x18		;V
 	cpfseq	m_byte,a
-	goto	bt_dec_W
+	goto	ButtonDecodeW
 	retlw	0x56
 	
-bt_dec_W:
+ButtonDecodeW:
 	movlw	0x0E		;W
 	cpfseq	m_byte,a
-	goto	bt_dec_X
+	goto	ButtonDecodeX
 	retlw	0x57
 	
-bt_dec_X:
+ButtonDecodeX:
 	movlw	0x19		;X
 	cpfseq	m_byte,a
-	goto	bt_dec_Y
+	goto	ButtonDecodeY
 	retlw	0x58
 	
-bt_dec_Y:
+ButtonDecodeY:
 	movlw	0x1D		;Y
 	cpfseq	m_byte,a
-	goto	bt_dec_Z
+	goto	ButtonDecodeZ
 	retlw	0x59
 	
-bt_dec_Z:
+ButtonDecodeZ:
 	movlw	0x13		;Z
 	cpfseq	m_byte,a
-	goto	bt_dec_1
+	goto	ButtonDecode1
 	retlw	0x5A
 	
-bt_dec_1:
+ButtonDecode1:
 	movlw	0x3E		;1
 	cpfseq	m_byte,a
-	goto	bt_dec_2
+	goto	ButtonDecode2
 	retlw	0x31
 	
-bt_dec_2:
+ButtonDecode2:
 	movlw	0x3C		;2
 	cpfseq	m_byte,a
-	goto	bt_dec_3
+	goto	ButtonDecode3
 	retlw	0x32
 
-bt_dec_3:
+ButtonDecode3:
 	movlw	0x38		;3
 	cpfseq	m_byte,a
-	goto	bt_dec_4
+	goto	ButtonDecode4
 	retlw	0x33
 	
-bt_dec_4:
+ButtonDecode4:
 	movlw	0x30		;4
 	cpfseq	m_byte,a
-	goto	bt_dec_5
+	goto	ButtonDecode5
 	retlw	0x34
 	
-bt_dec_5:
+ButtonDecode5:
 	movlw	0x20		;5
 	cpfseq	m_byte,a
-	goto	bt_dec_6
+	goto	ButtonDecode6
 	retlw	0x35
 	
-bt_dec_6:
+ButtonDecode6:
 	movlw	0x21		;6
 	cpfseq	m_byte,a
-	goto	bt_dec_7
+	goto	ButtonDecode7
 	retlw	0x36
 	
-bt_dec_7:
+ButtonDecode7:
 	movlw	0x23		;7
 	cpfseq	m_byte,a
-	goto	bt_dec_8
+	goto	ButtonDecode8
 	retlw	0x37
 	
-bt_dec_8:
+ButtonDecode8:
 	movlw	0x27		;8
 	cpfseq	m_byte,a
-	goto	bt_dec_9
+	goto	ButtonDecode9
 	retlw	0x38
 	
-bt_dec_9:
+ButtonDecode9:
 	movlw	0x2F		;9
 	cpfseq	m_byte,a
-	goto	bt_dec_0
+	goto	ButtonDecode0
 	retlw	0x39
 	
-bt_dec_0:
+ButtonDecode0:
 	movlw	0x3F		;0
 	cpfseq	m_byte,a
-	goto	bt_dec_qm
+	goto	ButtonDecodeqm
 	retlw	0x30
 	
-bt_dec_qm:
+ButtonDecodeQm:
 	movlw	0x4c		;?
 	cpfseq	m_byte,a
-	goto	bt_dec_em
+	goto	ButtonDecodeem
 	retlw	0x3F
 	
-bt_dec_em:
+ButtonDecodeEm:
 	movlw	0x75		;!
 	cpfseq	m_byte,a
-	goto	bt_dec_fs
+	goto	ButtonDecodefs
 	retlw	0x21
 	
-bt_dec_fs:
+ButtonDecodeFs:
 	movlw	0x6A		;.
 	cpfseq	m_byte,a
-	goto	bt_dec_cm
+	goto	ButtonDecodecm
 	retlw	0x2E
 	
-bt_dec_cm:
+ButtonDecodeCm:
 	movlw	0x73		;,
 	cpfseq	m_byte,a
-	goto	bt_dec_sc
+	goto	ButtonDecodesc
 	retlw	0x2C
 	
-bt_dec_sc:
+ButtonDecodeSc:
 	movlw	0x55		;;
 	cpfseq	m_byte,a
-	goto	bt_dec_cl
+	goto	ButtonDecodecl
 	retlw	0x3B
 	
-bt_dec_cl:
+ButtonDecodeCl:
 	movlw	0x47		;:
 	cpfseq	m_byte,a
-	goto	bt_dec_pl
+	goto	ButtonDecodepl
 	retlw	0x3A
 	
-bt_dec_pl:
+ButtonDecodePl:
 	movlw	0x2A		;+
 	cpfseq	m_byte,a
-	goto	bt_dec_mn
+	goto	ButtonDecodemn
 	retlw	0x2B
 	
-bt_dec_mn:
+ButtonDecodeMn:
 	movlw	0x61		;-
 	cpfseq	m_byte,a
-	goto	bt_dec_ds
+	goto	ButtonDecodeds
 	retlw	0x2D
 	
-bt_dec_ds:
+ButtonDecodeDs:
 	movlw	0x29		;/
 	cpfseq	m_byte,a
-	goto	bt_dec_eq
+	goto	ButtonDecodeeq
 	retlw	0x2F
 	
-bt_dec_eq:
+ButtonDecodeEq:
 	movlw	0x31		;=
 	cpfseq	m_byte,a
-	goto	bt_dec_space
+	goto	ButtonDecodespace
 	retlw	0x3D
 	
-bt_dec_space:
-	movlw	0xFF
+ButtonDecodeSPACE:
+	movlw	0xFF		;space
 	cpfseq	m_byte,a
-	goto	bt_dec_ERROR
+	goto	ButtonDecodeERROR
 	retlw	0x20
 	
 
-bt_dec_ERROR:
+ButtonDecodeERROR:
 	retlw	0x7E		;~
 
-bt_to_LCD:	
-	;call	Decrypt
-	call	bt_dec_A
-	;call	UART_Transmit_Byte
+ButtonToLCD:	
+	call	Decrypt
+	call	ButtonDecodeA
 	call	LCD_Send_Byte_D
-	incf	Cursor_counter, f, a
+	incf	Cursor_counter, f, a	; increase cursor position
 	movlw	0x10
-	cpfseq	Cursor_counter, a
-	goto	cont
-	call	LCD_secondLine
+	cpfseq	Cursor_counter, a	; checks if cursor is at the end of 1st line
+	goto	writeCharacter
+	call	LCD_secondLine		; go to 2nd line if at end of 1st line
 	
-cont:	movlw	0x20
-	cpfseq	Cursor_counter, a
+writeCharacter:
+	movlw	0x20
+	cpfseq	Cursor_counter, a	; checks if cursor is at the end of 2nd line
 	return
-	call	LCD_clear
-	clrf	Cursor_counter, a
+	call	LCD_clear		; clears entire discplay if at end
+	clrf	Cursor_counter, a	; resets cursor position
 	return
 
 Decrypt:
-	movf	byte_lower, w, a
-	xorwf	byte_higher, f, a
+	movf	byte_lower, w, a    
+	xorwf	byte_higher, f, a   ; takes XOR of the two bytes
 	movlw	0x10
-	mulwf	byte_higher, a
-	movff	PRODL, m_byte
+	mulwf	byte_higher, a	    ; splits the higher byte
+	movff	PRODL, m_byte	    ; only takes the lower value
 	
 	movlw	0x10
-	mulwf	byte_lower, a
-	movf	PRODH, W, A
-	addwf	m_byte, F, A
+	mulwf	byte_lower, a	    ; splits the lower byte
+	movf	PRODH, W, A	    ; only takes the higher value
+	addwf	m_byte, F, A	    ; adds the two values to form decrypted byte
 	
 	return
 	
