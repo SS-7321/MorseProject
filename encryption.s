@@ -65,13 +65,15 @@ mersenne_twister:
 	return
 
 encrypt:
-	call	encrypt_reset
-	call	mersenne_twister
-	call	mix_rand
-	call	xor_LH
-	movf	ENCL, W, A
-	call	UART_Transmit_Byte
-	movf	ENCH, W, A
+	;call	encrypt_reset
+	;call	mersenne_twister
+	;call	mix_rand
+	;call	xor_LH
+	;movf	ENCL, W, A
+	;call	UART_Transmit_Byte
+	;movf	ENCH, W, A
+	;call	UART_Transmit_Byte
+	movf	enc_byte, W, A
 	call	UART_Transmit_Byte
 	
 	return
