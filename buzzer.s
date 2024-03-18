@@ -1,11 +1,11 @@
 #include <xc.inc>
     
-global  buz_setup, buz_start, buz_stop
+global  BuzzerSetup, BuzzerStart, BuzzerStop
 
 
 psect	buzzer_code,class=CODE
 
-buz_setup:
+BuzzerSetup:
 	bsf	TRISB, 6, A
 	clrf	TRISE, A
 	clrf	CCPTMRS2
@@ -23,12 +23,12 @@ buz_setup:
 	movlb	0x00
 	return
 
-buz_start:
+BuzzerStart:
 	btfss	T2CON, 2
 	bsf	T2CON, 2
 	return
 	
-buz_stop:
+BuzzerStop:
 	btfsc	T2CON, 2
 	bcf	T2CON, 2
 	return
