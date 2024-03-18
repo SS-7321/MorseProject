@@ -1,55 +1,55 @@
 #include <xc.inc>
     
-global  btn, bt_setup, bt_read_cycle
+global  button, ButtonSetup, ButtonReadCycle
 
 
 psect	udata_acs   ; reserve data space in access ram
-btn:		    ds	1	    ; reserve 1 byte
-prev_btn:	    ds	1
-bt_readCounter1:    ds	1
-bt_readCounter2:    ds	1
+button:		    ds	1	    ; reserve 1 byte
+previous_button:	    ds	1
+button_read_counter_1:    ds	1
+button_read_counter_2:    ds	1
 
 
 psect	button_code,class=CODE
 
-bt_setup:
+ButtonSetup:
 	
 	setf	TRISD, A	; sets PORT H for input
-	call	bt_reset
+	call	ButtonReset
 	return
 	
-bt_reset:
-	clrf	btn, A		; clears value for button
-	clrf	prev_btn, A	;clears previous button
+ButtonReset:
+	clrf	button, A		; clears value for button
+	clrf	previous_button, A	;clears previous button
 	return	
 	
-bt_read:
-	movff	PORTD, btn	; reads vlaue of PORT H and saves it to button
+ButtonRead:
+	movff	PORTD, button	; reads vlaue of PORT H and saves it to button
 	return	; and saves 
 
-bt_and:
-	movf	prev_btn, W, A	;   takes IOR of prev button and current button
-	iorwf	btn, F, A	;   and save it as the current button
+ButtonIOR:
+	movf	previous_button, W, A	;   takes IOR of prev button and current button
+	iorwf	button, F, A	;   and save it as the current button
 	return
 
-bt_read_cycle:		    ; reads PORT H for a specific amount of time
-	call	bt_reset
+ButtonReadCycle:		    ; reads PORT H for a specific amount of time
+	call	ButtonReset
 	
 	movlw	0xFF
-	movwf	bt_readCounter1, A
+	movwf	button_read_counter_1, A
 	movlw	0x90
-	movwf	bt_readCounter2, A
-btrlms:
-	movff	btn, prev_btn, A
-	call	bt_read
-	call	bt_and
+	movwf	button_read_counter_2, A
+buttonReadLoop:
+	movff	button, previous_button, A
+	call	ButtonRead
+	call	ButtonIOR
 	
-	decfsz	bt_readCounter1, F, A
-	goto	btrlms
+	decfsz	button_read_counter_1, F, A
+	goto	buttonReadLoop
 	
-	decfsz	bt_readCounter2, F, A
-	goto	btrlms
-	movf	btn, W, A
+	decfsz	button_read_counter_2, F, A
+	goto	buttonReadLoop
+	movf	button, W, A
 	return
 
 	
