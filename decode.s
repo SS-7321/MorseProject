@@ -2,7 +2,7 @@
 ;editted
 global	ButtonDecodeA, cursor_counter, ButtonToLCD, DecodeSetup, Decrypt
 extrn	byte_higher, byte_lower	; byte from UART
-extrn	LCDSendByteData, LCDClear, LCDSecondLine
+extrn	LCDSendByteData, LCDClear, LCDSecondLine, LCDFirstLine
 
 psect	udata_acs   ; reserve data space in access ram
 cursor_counter:	ds 1
