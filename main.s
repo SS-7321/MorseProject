@@ -56,8 +56,8 @@ loop:	movff	btn, prev_cycle	;   new read cycle, move current to prev
 	call	bt_read_cycle	;   check current state
 	call	check_cycle
 	
-	
-	
+	tstfsz	byte_higher, A
+	call	bt_to_LCD	
 	goto	loop
 
 check_cycle:
