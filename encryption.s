@@ -32,47 +32,49 @@ EncryptReset:
 	return
 	
 MixRandomBytes:	;   mix encoded byte and rnadom number
-		;   random: FA and encoded byte: EB
-		;   final bytes are FE BA
-	movlw	0x0F		;   Filter A from FA as OA
-	andwf	random_byte, W, A	;   
-	movwf	encrypted_byte_lower, A		;   moves OA to lower Encrypted byte (encrypted_byte_lower)
+		;   example - random: FA and encoded byte: EB
+		;   final mixed bytes are FE BA
+	movlw	0x0F			    ; Filter A from FA as OA
+	andwf	random_byte, W, A	    ;   
+	movwf	encrypted_byte_lower, A	    ; moves OA to lower Encrypted byte (encrypted_byte_lower)
 	
-	movlw	0xF0		;   filter F from FA as F0
-	andwf	random_byte, W, A	;
-	movwf	encrypted_byte_higher, A		;   moves that to encrypted_byte_higher
+	movlw	0xF0			    ; filter F from FA as F0
+	andwf	random_byte, W, A	    ;
+	movwf	encrypted_byte_higher, A    ; moves that to encrypted_byte_higher
 	
-	movlw	0x10		;   splits EB into 0E B0
-	mulwf	encoded_byte, A	;
-	movf	PRODH, W, A	;   adds 0E to encrypted_byte_higher to get FE
-	addwf	encrypted_byte_higher, F, A	;
+	movlw	0x10			 
+	mulwf	encoded_byte, A		    ; splits EB into 0E B0
+	movf	PRODH, W, A		 
+	addwf	encrypted_byte_higher, F, A ; adds 0E to encrypted_byte_higher to get FE
 	
-	movf	PRODL, W, A	;   gets BO from PRODL register
-	addwf	encrypted_byte_lower, F, A	;   adds B0 to encrypted_byte_lower to get BA
+	movf	PRODL, W, A		    ; gets BO from PRODL register
+	addwf	encrypted_byte_lower, F, A  ; adds B0 to encrypted_byte_lower to get BA
 	return
 	
-XORLowHigh:		;   XOR FE with BA
+XORLowHigh:	;   XOR FE with BA and saves it in place of FE
 	movf	encrypted_byte_lower, W, A
 	xorwf	encrypted_byte_higher, F, A
 	return
 	
-MersenneTwister:
+MersenneTwister:    ;	simple mersenne twister algorithm of modulus 255 (FFh)
 	movf	MT_coefficient, W, A
 	mulwf	random_byte, A
 	movff	PRODL, random_byte
-	movf	RNG_counter, W, A
+	movf	RNG_counter, W, A   ; counter determined by previous number of on cycles
 	addwf	random_byte, F, A
 	return
 
 Encrypt:
-	call	EncryptReset
-	call	MersenneTwister
-	call	MixRandomBytes
-	call	XORLowHigh
-	movf	encrypted_byte_lower, W, A
-	call	UARTTransmitByte
+	movf	key, W, A		    ; XOR encoded byte with predefined key
+	xorwf	encoded_byte, F, A
+	call	EncryptReset		    ; resets relevant variables
+	call	MersenneTwister		    ; uses mersenne twister algorithm to generate a random byte
+	call	MixRandomBytes		    ; fills random byte around encoded byte
+	call	XORLowHigh		    ; XORs the higher and lower byte
+	movf	encrypted_byte_lower, W, A  
+	call	UARTTransmitByte	    ; send the lower encrypted byte via UART
 	movf	encrypted_byte_higher, W, A
-	call	UARTTransmitByte
+	call	UARTTransmitByte	    ; send the higher encrypted byte via UART
 
 	return
 	
