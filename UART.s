@@ -52,8 +52,6 @@ UARTInterrupt:
 receiveHigherByte:
     movff   RCREG1, byte_higher	;   move value from register to higher byte
     clrf    byte_counter, A
-    
-
     bcf	    RC1IF		;   clear interrupt flag
     retfie  f			;   fast return from interrupts
   
