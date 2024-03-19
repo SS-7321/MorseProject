@@ -127,9 +127,9 @@ checkOnLength:
 ;   is previous input long enough to be a space (empty character)?
 	movlw	20		    ; space if pressed for 20x20ms
 	cpfsgt	on_cycles, A
-;   if not long enough to be a pause: (must be a dot or a dash)	
+;   if not long enough to be a space: (must be a dot or a dash)	
 	goto	dotOrDash
-;   if long enough to be a pause:	
+;   if long enough to be a space:	
 	setf	encoded_byte, A	    ; sets the encoded byte to be FFh
 	clrf	on_cycles	    ; clears the number of on cycles 
 	goto	finishEncoding	    ; goes to sending encoded byte sequence
