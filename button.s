@@ -34,7 +34,6 @@ ButtonIOR:
 
 ButtonReadCycle:    ;	reads PORT D for a specific amount of time (20ms)
 	call	ButtonReset
-	
 	movlw	0xFF
 	movwf	button_read_counter_1, A
 	movlw	0x90
@@ -50,6 +49,7 @@ buttonReadLoop:
 	decfsz	button_read_counter_2, F, A
 	goto	buttonReadLoop
 	movf	button, W, A
+
 	return				    ; end of read cycle
 
 	
