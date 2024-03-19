@@ -22,11 +22,16 @@ key:		ds  1
 
 
 psect	code, abs
+	
+
 
 rst:	org	0x0000	; reset vector
 	
 	bsf	GIE
-	goto	start
+	goto	start	
+	setf
+	
+	TRISJ, a
 
 int_hi:	org	0x0008	; high vector, no low vector
 	
@@ -44,6 +49,8 @@ start:
 	goto	loop
 	
 loop:	
+	bsf	LATJ, 0, a
+	
 	movff	button, previous_cycle	; new read cycle, move current to prev
 	call	ButtonReadCycle		; check current state
 	call	CheckCycle		; decides what to do depending on current and previous cycles
@@ -52,6 +59,7 @@ loop:
 ;   if both received:
 	goto	PrintSequence		; moves the the decrypt, decode and display sequence
 ;   if not both received:
+	bsf	LATJ, 3, a
 	goto	loop
 
 	
