@@ -1,7 +1,7 @@
 #include <xc.inc>
 ;editted
 global	ButtonDecodeA, cursor_counter, ButtonToLCD, DecodeSetup, Decrypt
-extrn	byte_higher, byte_lower	; byte from UART
+extrn	byte_higher, byte_lower	; bytes from UART
 extrn	LCDSendByteData, LCDClear, LCDSecondLine, LCDFirstLine
 
 psect	udata_acs   ; reserve data space in access ram
@@ -14,10 +14,10 @@ DecodeSetup:
 	clrf    cursor_counter
     
 ButtonDecodeA:
-	movlw	0x06		; byte for A
-	cpfseq	decrypted_byte,a	; compare received value to 'A' byte
-	goto	ButtonDecodeB	; if not same, skips to next value
-	retlw	0x41		; if true, return ascii for 'A'
+	movlw	0x06		    ; byte for A
+	cpfseq	decrypted_byte,a    ; compare received value to 'A' byte
+	goto	ButtonDecodeB	    ; if not same, skips to next value
+	retlw	0x41		    ; if true, return ASCII for 'A'
 	
 ButtonDecodeB:
 	movlw	0x11		;B
@@ -319,15 +319,17 @@ writeCharacter:
 
 Decrypt:
 	movf	byte_lower, w, a    
-	xorwf	byte_higher, f, a   ; takes XOR of the two bytes
+	xorwf	byte_higher, f, a	; takes XOR of the two bytes
 	movlw	0x10
-	mulwf	byte_higher, a	    ; splits the higher byte
-	movff	PRODL, decrypted_byte	    ; only takes the lower value
+	mulwf	byte_higher, a		; splits the higher byte
+	movff	PRODL, decrypted_byte	; only takes the lower value
 	
 	movlw	0x10
-	mulwf	byte_lower, a	    ; splits the lower byte
-	movf	PRODH, W, A	    ; only takes the higher value
-	addwf	decrypted_byte, F, A	    ; adds the two values to form decrypted byte
+	mulwf	byte_lower, a		; splits the lower byte
+	movf	PRODH, W, A		; only takes the higher value
+	addwf	decrypted_byte, F, A	; adds the two values to form decrypted byte
+	movf	key, W, A
+	xorwf	decrypted_byte, F, A	; XOR decrypted byte with predefined key
 	
 	return
 	
