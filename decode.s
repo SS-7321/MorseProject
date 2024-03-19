@@ -319,6 +319,7 @@ writeCharacter:
 	return
 
 Decrypt:
+
 	movf	byte_lower, w, a    
 	xorwf	byte_higher, f, a	; takes XOR of the two bytes
 	movlw	0x10
@@ -331,6 +332,7 @@ Decrypt:
 	addwf	decrypted_byte, F, A	; adds the two values to form decrypted byte
 	movf	key, W, A
 	xorwf	decrypted_byte, F, A	; XOR decrypted byte with predefined key
+
 	
 	return
 	
