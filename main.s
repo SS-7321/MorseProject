@@ -114,7 +114,7 @@ checkOffLength:
 ;   if long enough:
     ;   encrypted a byte within this pause before? (encoding byte is true?)
 
- 	tstfsz	boolean_do_send, A
+ 	tstfsz	boolean_do_send, A 
     ;	if not encrypted a byte yet:
 	goto	wrap
     ;   if already encrypted a byte before:
