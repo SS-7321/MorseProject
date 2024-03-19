@@ -46,14 +46,16 @@ start:
 loop:	
 	movff	button, previous_cycle	; new read cycle, move current to prev
 	call	ButtonReadCycle		; check current state
-	call	CheckCycle
-	
-	tstfsz	byte_higher, A
-	goto	PrintSequence
+	call	CheckCycle		; decides what to do depending on current and previous cycles
+;   is both incoming bytes received?
+	tstfsz	byte_higher, A	
+;   if both received:
+	goto	PrintSequence		; moves the the decrypt, decode and display sequence
+;   if not both received:
 	goto	loop
 
 	
-ResetValues:
+ResetValues:	; resets the values of the following variables before encoding the next character
 	movlw	0x01
 	movwf	bit_position, A
 	clrf	encoded_byte
@@ -61,37 +63,40 @@ ResetValues:
 	clrf	boolean_do_send
 	return
 	
-PrintSequence:
-	call	ButtonToLCD
-	clrf	byte_higher
-	clrf	byte_lower
-	goto	loop
+PrintSequence:	; decrypts, decodes and displays the received message
+	call	ButtonToLCD ; decrypt, decode, display function
+	clrf	byte_higher ; clears byte adresses for higher received byte
+	clrf	byte_lower  ; clears byte address for lower received byte
+	goto	loop	    ; LOOPS BACK
 	
 CheckCycle:
-        tstfsz	button, A   ; check if the button is pressed
-	goto	CycleIsOn    ; pressed
-	goto	CycleIsOff   ; not pressed
+;   is the button pressed?
+        tstfsz	button, A   
+;   if pressed:	
+	goto	cycleIsOn
+;   if not pressed:
+	goto	cycleIsOff
 	
 	
-CycleIsOn:
-	call	BuzzerStart
-	incf	on_cycles
-	incf	RNG_counter
-	clrf	off_cycles
-	setf	boolean_do_send, A
+cycleIsOn:
+	call	BuzzerStart	    ; starts buzzer sound
+	incf	on_cycles	    ; increases number of on cycles recorded
+	incf	RNG_counter	    ; increments a variable for mersenne twister
+	clrf	off_cycles	    ; clears number of off cycles recorded
+	setf	boolean_do_send, A  ; sets the encoding boolean to be true
 	return
 	
 	
-CycleIsOff:
-	call	BuzzerStop
+cycleIsOff:
+	call	BuzzerStop	; 
     	incf	off_cycles
 ;   was the previous cycle off?
 	tstfsz	previous_cycle, A
 ;   if previous cycle was on:
-	goto	checkOnLength	    ; just finished input, goto encode result
+	goto	checkOnLength	; just finished input, goto encode result
 ;   if previous cycle was off:
-	goto	checkOffLength    ; check current pause length
-	return
+	goto	checkOffLength	; check current pause length
+	
 
 checkOffLength:
 ;   is pause long enough for new character?
@@ -110,8 +115,6 @@ wrap:
 	movf	bit_position, W, A
 	xorwf	encoded_byte, F, A
 	call	finishEncoding
-	clrf	encoded_byte
-	clrf	boolean_do_send, A
 	clrf	off_cycles
 	
 	return
@@ -121,19 +124,15 @@ checkOnLength:
 	movlw	20
 	cpfsgt	on_cycles, A
 	goto	dotOrDash
-	
 	setf	encoded_byte, A
 	clrf	on_cycles
 	goto	finishEncoding
-	return
 	
 dotOrDash:
 	movlw	8      ; dash if 8 cycles long (12x20ms)
 	cpfsgt	on_cycles, A
 	goto	encodeDot
 	goto	encodeDash
-	
-	return
 
 encodeDash:
 	movf	bit_position, W, A
@@ -141,17 +140,16 @@ encodeDash:
 	rlncf	bit_position, F, A
 	clrf	on_cycles
 
-	
 	return
 encodeDot:
 
 	rlncf	bit_position, F, A
 	clrf	on_cycles
+	
 	return
 	
 finishEncoding:
 
-;   move encoded byte to Wreg
 	call	Encrypt
 	call	ResetValues
 	return
