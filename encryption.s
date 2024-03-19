@@ -78,7 +78,6 @@ Encrypt:
 	movf	encrypted_byte_higher, W, A
 	call	UARTTransmitByte	    ; send the higher encrypted byte via UART
 
-
 	return
 	
 end
