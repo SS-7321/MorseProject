@@ -26,19 +26,19 @@ psect	code, abs
 
 
 rst:	org	0x0000	; reset vector
-	
-	bsf	GIE
+	setf TRISJ, a
 	goto	start	
-	setf
-	
-	TRISJ, a
+
+
 
 int_hi:	org	0x0008	; high vector, no low vector
 	
 	call	UARTInterrupt
 	return
 	
-start:	
+start:	;   calls all module setups and goes to main loop
+	movlw	0x65
+	movwf	key, A
         call	ButtonSetup
 	call	DecodeSetup
 	call	LCDSetup
@@ -48,9 +48,10 @@ start:
 	call	ResetValues
 	goto	loop
 	
-loop:	
+loop:	;   main loop
 	bsf	LATJ, 0, a
-	
+
+
 	movff	button, previous_cycle	; new read cycle, move current to prev
 	call	ButtonReadCycle		; check current state
 	call	CheckCycle		; decides what to do depending on current and previous cycles
@@ -75,7 +76,7 @@ PrintSequence:	; decrypts, decodes and displays the received message
 	call	ButtonToLCD ; decrypt, decode, display function
 	clrf	byte_higher ; clears byte adresses for higher received byte
 	clrf	byte_lower  ; clears byte address for lower received byte
-	goto	loop	    ; LOOPS BACK
+	goto	loop
 	
 CheckCycle:
 ;   is the button pressed?
@@ -96,8 +97,8 @@ cycleIsOn:
 	
 	
 cycleIsOff:
-	call	BuzzerStop	; 
-    	incf	off_cycles
+	call	BuzzerStop	; stops the buzzer
+    	incf	off_cycles	; increasee the number of recorded off cycles
 ;   was the previous cycle off?
 	tstfsz	previous_cycle, A
 ;   if previous cycle was on:
@@ -108,58 +109,71 @@ cycleIsOff:
 
 checkOffLength:
 ;   is pause long enough for new character?
-	movlw	10
+	movlw	10  ; new character after 10x20ms
 	cpfsgt	off_cycles, A
-	return	;   return if not a new character
+;   if not long enough:
+	return	    ; return if not a new character
 ;   if long enough:
-;   Encrypted a byte before within this pause?
+    ;   encrypted a byte within this pause before? (encoding byte is true?)
  	tstfsz	boolean_do_send, A
+    ;	if not encrypted a byte yet:
 	goto	wrap
-	return
+    ;   if already encrypted a byte before:
+	return	    ; return if already encrypted a byte
 	
 wrap:
 ;   if not Encrypted before:
-;   set the identifier bit
-	movf	bit_position, W, A
-	xorwf	encoded_byte, F, A
-	call	finishEncoding
-	clrf	off_cycles
+	movf	bit_position, W, A  ; shifts the bit position up
+	xorwf	encoded_byte, F, A  ; set the identifier bit in the encoded byte
+	call	finishEncoding	    ; goes to sending encoded byte sequence
+	clrf	off_cycles	    ; clears the number of off cycles recorded
 	
 	return
 	
 checkOnLength:
-;   is prev input dot or dash?
-	movlw	20
+;   is previous input long enough to be a space (empty character)?
+	movlw	20		    ; space if pressed for 20x20ms
 	cpfsgt	on_cycles, A
+;   if not long enough to be a space: (must be a dot or a dash)	
 	goto	dotOrDash
-	setf	encoded_byte, A
-	clrf	on_cycles
-	goto	finishEncoding
+;   if long enough to be a space:	
+	setf	encoded_byte, A	    ; sets the encoded byte to be FFh
+	clrf	on_cycles	    ; clears the number of on cycles 
+	goto	finishEncoding	    ; goes to sending encoded byte sequence
 	
 dotOrDash:
-	movlw	8      ; dash if 8 cycles long (12x20ms)
+;   is previous input long enough to be a dash?    
+	movlw	8      ; dash if 8 cycles long (8x20ms)
 	cpfsgt	on_cycles, A
+;   if not long enough: (must be a dot)	
 	goto	encodeDot
+;   if long enough to be a dash:	
 	goto	encodeDash
 
-encodeDash:
-	movf	bit_position, W, A
-	xorwf	encoded_byte, F, A
-	rlncf	bit_position, F, A
-	clrf	on_cycles
+encodeDash: ;	dashes are encoded as 1
+	movf	bit_position, W, A  ; XOR the bit_position and encoded byte
+	xorwf	encoded_byte, F, A  ; encoded byte:     0 0 0 0 0 1 0 1
+				    ; bit position:	0 0 0 0 1 0 0 0
+				    ; XOR above bytes-------------------------
+				    ; new encoded byte: 0 0 0 0 1 1 0 1
+				    
+	rlncf	bit_position, F, A  ; shifts bit position up
+				    ; new bit position: 0 0 0 1 0 0 0 0
+	clrf	on_cycles	    ; clears the number of on cycles recorded
 
 	return
-encodeDot:
-
-	rlncf	bit_position, F, A
-	clrf	on_cycles
+	
+encodeDot:  ;	dots are encoded as 0
+				    ; encoded byte is 00h at the start - no need to set bits to be 0
+	rlncf	bit_position, F, A  ; shifts bit position up
+	clrf	on_cycles	    ; clears the number of on cycles recorded
 	
 	return
 	
 finishEncoding:
 
-	call	Encrypt
-	call	ResetValues
+	call	Encrypt		; calls encryption and UART sending function
+	call	ResetValues	; resets relavent values for new character input
 	return
 end	rst
 
