@@ -26,7 +26,6 @@ psect	code, abs
 
 
 rst:	org	0x0000	; reset vector
-	setf TRISJ, a
 	goto	start	
 
 
@@ -49,9 +48,6 @@ start:	;   calls all module setups and goes to main loop
 	goto	loop
 	
 loop:	;   main loop
-	bsf	LATJ, 0, a
-
-
 	movff	button, previous_cycle	; new read cycle, move current to prev
 	call	ButtonReadCycle		; check current state
 	call	CheckCycle		; decides what to do depending on current and previous cycles
@@ -60,7 +56,7 @@ loop:	;   main loop
 ;   if both received:
 	goto	PrintSequence		; moves the the decrypt, decode and display sequence
 ;   if not both received:
-	bsf	LATJ, 3, a
+	
 	goto	loop
 
 	
@@ -74,8 +70,10 @@ ResetValues:	; resets the values of the following variables before encoding the 
 	
 PrintSequence:	; decrypts, decodes and displays the received message
 	call	ButtonToLCD ; decrypt, decode, display function
+
 	clrf	byte_higher ; clears byte adresses for higher received byte
 	clrf	byte_lower  ; clears byte address for lower received byte
+
 	goto	loop
 	
 CheckCycle:
@@ -115,6 +113,7 @@ checkOffLength:
 	return	    ; return if not a new character
 ;   if long enough:
     ;   encrypted a byte within this pause before? (encoding byte is true?)
+
  	tstfsz	boolean_do_send, A
     ;	if not encrypted a byte yet:
 	goto	wrap
@@ -123,6 +122,7 @@ checkOffLength:
 	
 wrap:
 ;   if not Encrypted before:
+
 	movf	bit_position, W, A  ; shifts the bit position up
 	xorwf	encoded_byte, F, A  ; set the identifier bit in the encoded byte
 	call	finishEncoding	    ; goes to sending encoded byte sequence
