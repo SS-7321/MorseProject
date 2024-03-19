@@ -65,16 +65,19 @@ MersenneTwister:    ;	simple mersenne twister algorithm of modulus 255 (FFh)
 	return
 
 Encrypt:
+
 	movf	key, W, A		    ; XOR encoded byte with predefined key
 	xorwf	encoded_byte, F, A
 	call	EncryptReset		    ; resets relevant variables
 	call	MersenneTwister		    ; uses mersenne twister algorithm to generate a random byte
 	call	MixRandomBytes		    ; fills random byte around encoded byte
 	call	XORLowHigh		    ; XORs the higher and lower byte
+
 	movf	encrypted_byte_lower, W, A  
 	call	UARTTransmitByte	    ; send the lower encrypted byte via UART
 	movf	encrypted_byte_higher, W, A
 	call	UARTTransmitByte	    ; send the higher encrypted byte via UART
+
 
 	return
 	
