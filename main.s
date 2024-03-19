@@ -26,6 +26,8 @@ psect	code, abs
 rst:	org	0x0000	; reset vector
 	
 	bsf	GIE
+	movlw	0x65
+	movwf	key, A
 	goto	start
 
 int_hi:	org	0x0008	; high vector, no low vector
