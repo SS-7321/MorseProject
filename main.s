@@ -1,18 +1,15 @@
 #include <xc.inc>
 
-
-
 extrn	button, ButtonSetup, ButtonReadCycle	; from button
 extrn	LCDSetup				; from LCD
 extrn	ButtonToLCD, DecodeSetup		; from decode
 extrn	EncryptSetup, Encrypt, RNG_counter	; from encryption
 extrn	BuzzerSetup, BuzzerStart, BuzzerStop	; from buzzer
-extrn	StringSetup, StringToLCD		; from string
 extrn	UARTInterrupt, UARTSetup, byte_higher, byte_lower   ; from UART
     
 global	key, encoded_byte
     
-psect	udata_acs   ; reserve data space in access ram
+psect	udata_acs   ; reserve data space in access ram -------------------------
 previous_cycle: ds  1
 on_cycles:	ds  1
 off_cycles:	ds  1
@@ -20,18 +17,11 @@ bit_position:	ds  1
 encoded_byte:   ds  1
 boolean_do_send:ds  1
 key:		ds  1
-
-
-
     
-psect	code, abs
+psect	code, abs   ;	--------------------------------------------------------
 	
-
-
 rst:	org	0x0000	; reset vector
 	goto	start	
-
-
 
 int_hi:	org	0x0008	; high vector, no low vector
 	
@@ -157,7 +147,7 @@ encodeDash: ;	dashes are encoded as 1
 	movf	bit_position, W, A  ; XOR the bit_position and encoded byte
 	xorwf	encoded_byte, F, A  ; encoded byte:     0 0 0 0 0 1 0 1
 				    ; bit position:	0 0 0 0 1 0 0 0
-				    ; XOR above bytes-------------------------
+				    ; XOR above bytes----------------------
 				    ; new encoded byte: 0 0 0 0 1 1 0 1
 				    
 	rlncf	bit_position, F, A  ; shifts bit position up
