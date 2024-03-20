@@ -11,7 +11,7 @@ psect	data
 	; ******* StringMessage, data in programme memory, and its length *****
 StringMessage:
 	db	'C','o','n','n','e','c','t','i','n','g','.','.','.',0x0a    ; message, plus carriage return
-	string_length   EQU    14	; length of data
+	string_length   EQU    13	; length of data
 
 	align	2
 	
