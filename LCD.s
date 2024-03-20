@@ -1,6 +1,6 @@
 #include <xc.inc>
 
-global  LCDSetup, LCDWriteMessage, LCDClear, LCDSecondLine, LCDSendByteData, LCDWriteHex, LCDFirstLine
+global  LCDSetup, LCDWriteMessage, LCDClear, LCDSecondLine, LCDSendByteData, LCDWriteHex, LCDFirstLine, DelayMS
 
 psect	udata_acs   ; named variables in access ram
 LCD_counter_lower:	ds 1	; reserve 1 byte for variable LCD_counter_lower
@@ -22,7 +22,7 @@ LCDSetup:
 	movlw   11000000B	; RB0:5 all outputs
 	movwf	TRISB, A
 	movlw   40
-	call	LCD_delay_ms	; wait 40ms for LCD to start up properly
+	call	DelayMS	; wait 40ms for LCD to start up properly
 	movlw	00110000B	; Function set 4-bit
 	call	LCD_Send_Byte_I
 	movlw	10		; wait 40us
@@ -42,7 +42,7 @@ LCDSetup:
 	movlw	00000001B	; display clear
 	call	LCD_Send_Byte_I
 	movlw	2		; wait 2ms
-	call	LCD_delay_ms
+	call	DelayMS
 	movlw	00000110B	; entry mode incr by 1 no shift
 	call	LCD_Send_Byte_I
 	movlw	10		; wait 40us
@@ -125,7 +125,7 @@ LCD_Enable:	    ; pulse enable bit LCD_E for 500ns
 	return
     
 ; ** a few delay routines below here as LCD timing can be quite critical ****
-LCD_delay_ms:		    ; delay given in ms in W
+DelayMS:		    ; delay given in ms in W
 	movwf	LCD_counter_ms, A
 lcdlp2:	movlw	250	    ; 1 ms delay
 	call	LCD_delay_x4us	
@@ -155,9 +155,9 @@ LCDClear:
 	movlw	00000001B	; display clear
 	call	LCD_Send_Byte_I
 	movlw	0xFF
-	call	LCD_delay_ms
+	call	DelayMS
 	movlw	100
-	call	LCD_delay_ms
+	call	DelayMS
 	return
 	
 LCDSecondLine:		; moves cursor to second line
