@@ -1,5 +1,5 @@
 #include <xc.inc>
-global  UARTSetup, UARTTransmitByte, byte_higher, byte_lower, UARTInterrupt
+global  UARTSetup, UARTTransmitByte, byte_higher, byte_lower, UARTInterrupt, UARTClearBytes
 
 psect	udata_acs   ; reserve data space in access ram
 UART_counter:	ds  1	    ; reserve 1 byte for variable UART_counter
@@ -22,7 +22,14 @@ UARTSetup:
     bsf	    GIE
     bsf	    PEIE
     clrf    byte_counter
+    call    UARTClearBytes
+
     
+    return
+    
+UARTClearBytes:	;   clears received byte addresses
+    clrf    byte_lower
+    clrf    byte_higher
     return
 
 UARTTransmitMessage:	    ;	Message stored at FSR1, length stored in W
