@@ -41,7 +41,6 @@ stringLoop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	movlw	string_length		; output message to LCD
 	lfsr	2, StringSpace
 	call	LCDWriteMessage
-	call	LCDSecondLine
 	return
 
 
