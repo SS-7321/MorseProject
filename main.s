@@ -5,7 +5,8 @@ extrn	LCDSetup				; from LCD
 extrn	ButtonToLCD, DecodeSetup		; from decode
 extrn	EncryptSetup, Encrypt, RNG_counter	; from encryption
 extrn	BuzzerSetup, BuzzerStart, BuzzerStop	; from buzzer
-extrn	UARTInterrupt, UARTSetup, byte_higher, byte_lower   ; from UART
+extrn	UARTInterrupt, UARTSetup, byte_higher, UARTClearBytes   ; from UART
+extrn	ConnectSetup, GetConnection
     
 global	key, encoded_byte
     
@@ -38,6 +39,9 @@ start:	;   calls all module setups and goes to main loop
 	call	BuzzerSetup
 	call	UARTSetup
 	call	ResetValues
+	call	ConnectSetup
+	call	BuzzerStop
+	call	GetConnection
 	goto	loop
 	
 loop:	;   main loop
@@ -62,10 +66,9 @@ ResetValues:	; resets the values of the following variables before encoding the 
 	return
 	
 PrintSequence:	; decrypts, decodes and displays the received message
-	call	ButtonToLCD ; decrypt, decode, display function
+	call	ButtonToLCD	; decrypt, decode, display function
 
-	clrf	byte_higher ; clears byte adresses for higher received byte
-	clrf	byte_lower  ; clears byte address for lower received byte
+	call	UARTClearBytes	; clears received byte addresses
 
 	goto	loop
 	
