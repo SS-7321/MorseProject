@@ -7,6 +7,7 @@ extrn	LCDSetup				; from LCD
 extrn	ButtonToLCD, DecodeSetup		; from decode
 extrn	EncryptSetup, Encrypt, RNG_counter	; from encryption
 extrn	BuzzerSetup, BuzzerStart, BuzzerStop	; from buzzer
+extrn	StringSetup, StringToLCD		; from string
 extrn	UARTInterrupt, UARTSetup, byte_higher, byte_lower   ; from UART
     
 global	key, encoded_byte
@@ -21,6 +22,8 @@ boolean_do_send:ds  1
 key:		ds  1
 
 
+
+    
 psect	code, abs
 	
 
@@ -118,7 +121,7 @@ checkOffLength:
     ;	if not encrypted a byte yet:
 	goto	wrap
     ;   if already encrypted a byte before:
-	return	    ; return if already encrypted a byte
+	return
 	
 wrap:
 ;   if not Encrypted before:
