@@ -314,7 +314,7 @@ writeCharacter:
 	movlw	0x20
 	cpfseq	cursor_counter, a	; checks if cursor is at the end of 2nd line
 	return
-	call	LCDClear		; clears entire discplay if at end
+	call	LCDFirstLine		; goes back to 1st line if at the end of 2nd line
 	clrf	cursor_counter, a	; resets cursor position
 	return
 
