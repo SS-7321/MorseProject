@@ -19,7 +19,7 @@ psect	lcd_code,class=CODE
     
 LCDSetup:
 	clrf    LATB, A
-	movlw   11000000B	    ; RB0:5 all outputs
+	movlw   11000000B	; RB0:5 all outputs
 	movwf	TRISB, A
 	movlw   40
 	call	LCD_delay_ms	; wait 40ms for LCD to start up properly
