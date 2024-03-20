@@ -168,7 +168,7 @@ LCDSecondLine:		; moves cursor to second line
     return
     
 LCDFirstLine:		; moves cursor to first line
-    movlw   0x40
+    movlw   2
     call    LCD_Send_Byte_I
     movlw   10		; wait 40us
     call    LCD_delay_x4us
