@@ -48,6 +48,7 @@ loop:	;   main loop
 	movff	button, previous_cycle	; new read cycle, move current to prev
 	call	ButtonReadCycle		; check current state
 	call	CheckCycle		; decides what to do depending on current and previous cycles
+
 ;   is both incoming bytes received?
 	tstfsz	byte_higher, A	
 ;   if both received:
@@ -67,7 +68,6 @@ ResetValues:	; resets the values of the following variables before encoding the 
 	
 PrintSequence:	; decrypts, decodes and displays the received message
 	call	ButtonToLCD	; decrypt, decode, display function
-
 	call	UARTClearBytes	; clears received byte addresses
 
 	goto	loop
