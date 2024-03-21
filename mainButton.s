@@ -1,153 +1,175 @@
 #include <xc.inc>
-; edited
 
-
-extrn	btn, bt_setup, bt_read_cycle	
-extrn	LCD_Setup, LCD_Send_Byte_D
-extrn	bt_to_LCD, dec_setup
-extrn	RNG_counter, m_byte
-extrn	encrypt, ENCH, ENCL, byte_lower, byte_higher, encrypt_setup
-extrn	buz_setup, buz_start, buz_stop
-extrn	UART_Setup, UART_Transmit_Byte, UART_Int
+extrn	button, ButtonSetup, ButtonReadCycle	; from button
+extrn	LCDSetup				; from LCD
+extrn	ButtonToLCD, DecodeSetup		; from decode
+extrn	EncryptSetup, Encrypt, RNG_counter	; from encryption
+extrn	BuzzerSetup, BuzzerStart, BuzzerStop	; from buzzer
+extrn	UARTInterrupt, UARTSetup, byte_higher, UARTClearBytes   ; from UART
+extrn	ConnectSetup, GetConnection
     
-global	key, enc_byte
+global	key, encoded_byte
     
-psect	udata_acs   ; reserve data space in access ram
-prev_cycle: ds	1
-on_cycles:  ds	1
-off_cycles: ds	1
-bit_pos:    ds	1
-enc_byte:   ds	1
-rand_byte:  ds	1
-do_send:    ds	1
-key:	    ds	1
-
-
-psect	code, abs
-rst:	org	0x0000	; reset vector
+psect	udata_acs   ; reserve data space in access ram -------------------------
+previous_cycle: ds  1
+on_cycles:	ds  1
+off_cycles:	ds  1
+bit_position:	ds  1
+encoded_byte:   ds  1
+boolean_do_send:ds  1
+key:		ds  1
+    
+psect	code, abs   ;	--------------------------------------------------------
 	
-	bsf	GIE
-	goto	start
+rst:	org	0x0000	; reset vector
+	goto	start	
 
 int_hi:	org	0x0008	; high vector, no low vector
-	call	UART_Int
+	
+	call	UARTInterrupt
 	return
 	
-start:	
-        call	bt_setup
-	call	dec_setup
-	call	LCD_Setup
-	call	encrypt_setup
-	call	buz_setup
-	call	UART_Setup
-	call	reset_vals
+start:	;   calls all module setups and goes to main loop
+	movlw	0x65
+	movwf	key, A
+        call	ButtonSetup
+	call	DecodeSetup
+	call	LCDSetup
+	call	EncryptSetup
+	call	BuzzerSetup
+	call	UARTSetup
+	call	ResetValues
+	;call	ConnectSetup
+	;call	BuzzerStop
+	;call	GetConnection
 	goto	loop
 	
+loop:	;   main loop
+	movff	button, previous_cycle	; new read cycle, move current to prev
+	call	ButtonReadCycle		; check current state
+	call	CheckCycle		; decides what to do depending on current and previous cycles
+;   is both incoming bytes received?
+	tstfsz	byte_higher, A	
+;   if both received:
+	goto	PrintSequence		; moves the the decrypt, decode and display sequence
+;   if not both received:
 	
-reset_vals:
+	goto	loop
+
+	
+ResetValues:	; resets the values of the following variables before encoding the next character
 	movlw	0x01
-	movwf	bit_pos, A
-	clrf	enc_byte
+	movwf	bit_position, A
+	clrf	encoded_byte
 	clrf	on_cycles
-	clrf	do_send
+	clrf	boolean_do_send
 	return
+	
+PrintSequence:	; decrypts, decodes and displays the received message
+	call	ButtonToLCD	; decrypt, decode, display function
 
+	call	UARTClearBytes	; clears received byte addresses
 
-loop:	movff	btn, prev_cycle	;   new read cycle, move current to prev
-	call	bt_read_cycle	;   check current state
-	call	check_cycle
-	
-	
-	
 	goto	loop
-
-check_cycle:
-        tstfsz	btn, A	    ;	check if the button is pressed
-	goto	cycle_on    ;	pressed
-	goto	cycle_off   ;	not pressed
+	
+CheckCycle:
+;   is the button pressed?
+        tstfsz	button, A   
+;   if pressed:	
+	goto	cycleIsOn
+;   if not pressed:
+	goto	cycleIsOff
 	
 	
-cycle_on:
-	call	buz_start
-	incf	on_cycles
-	incf	RNG_counter
-	clrf	off_cycles
-	setf	do_send, A
+cycleIsOn:
+	call	BuzzerStart	    ; starts buzzer sound
+	incf	on_cycles	    ; increases number of on cycles recorded
+	incf	RNG_counter	    ; increments a variable for mersenne twister
+	clrf	off_cycles	    ; clears number of off cycles recorded
+	setf	boolean_do_send, A  ; sets the encoding boolean to be true
 	return
 	
 	
-cycle_off:
-	call	buz_stop
-    	incf	off_cycles
-;   was the prev cycle off?
-	tstfsz	prev_cycle, A
-;   if prev on:
-	goto	check_on_length	    ;	just finished input, goto encode result
-;   if prev off:
-	goto	check_off_length    ;	prev cycle was on, encode prev input
-	return
+cycleIsOff:
+	call	BuzzerStop	; stops the buzzer
+    	incf	off_cycles	; increasee the number of recorded off cycles
+;   was the previous cycle off?
+	tstfsz	previous_cycle, A
+;   if previous cycle was on:
+	goto	checkOnLength	; just finished input, goto encode result
+;   if previous cycle was off:
+	goto	checkOffLength	; check current pause length
+	
 
-check_off_length:
+checkOffLength:
 ;   is pause long enough for new character?
-	movlw	10
+	movlw	10  ; new character after 10x20ms
 	cpfsgt	off_cycles, A
-	return	;   return if not a new character
+;   if not long enough:
+	return	    ; return if not a new character
 ;   if long enough:
-;   encrypted a byte before within this pause?
- 	tstfsz	do_send, A
+    ;   encrypted a byte within this pause before? (encoding byte is true?)
+
+ 	tstfsz	boolean_do_send, A 
+    ;	if not encrypted a byte yet:
 	goto	wrap
+    ;   if already encrypted a byte before:
 	return
 	
 wrap:
-;   if not encrypted before:
-;   set the identifier bit
-	movf	bit_pos, W, A
-	xorwf	enc_byte, F, A
-	call	enc_finish
-	clrf	enc_byte
-	clrf	do_send, A
-	clrf	off_cycles
+;   if not Encrypted before:
+
+	movf	bit_position, W, A  ; shifts the bit position up
+	xorwf	encoded_byte, F, A  ; set the identifier bit in the encoded byte
+	call	finishEncoding	    ; goes to sending encoded byte sequence
+	clrf	off_cycles	    ; clears the number of off cycles recorded
 	
 	return
 	
-check_on_length:
-;   is prev input dot or dash?
-	movlw	24
+checkOnLength:
+;   is previous input long enough to be a space (empty character)?
+	movlw	20		    ; space if pressed for 20x20ms
 	cpfsgt	on_cycles, A
-	goto	dot_dash
+;   if not long enough to be a space: (must be a dot or a dash)	
+	goto	dotOrDash
+;   if long enough to be a space:	
+	setf	encoded_byte, A	    ; sets the encoded byte to be FFh
+	clrf	on_cycles	    ; clears the number of on cycles 
+	goto	finishEncoding	    ; goes to sending encoded byte sequence
 	
-	setf	enc_byte, A
-	clrf	on_cycles
-	goto	enc_finish
-	return
-	
-dot_dash:
-	movlw	8      ;	dash if 8 cycles long (12x20ms)
+dotOrDash:
+;   is previous input long enough to be a dash?    
+	movlw	8      ; dash if 8 cycles long (8x20ms)
 	cpfsgt	on_cycles, A
-	goto	enc_dot
-	goto	enc_dash
+;   if not long enough: (must be a dot)	
+	goto	encodeDot
+;   if long enough to be a dash:	
+	goto	encodeDash
+
+encodeDash: ;	dashes are encoded as 1
+	movf	bit_position, W, A  ; XOR the bit_position and encoded byte
+	xorwf	encoded_byte, F, A  ; encoded byte:     0 0 0 0 0 1 0 1
+				    ; bit position:	0 0 0 0 1 0 0 0
+				    ; XOR above bytes----------------------
+				    ; new encoded byte: 0 0 0 0 1 1 0 1
+				    
+	rlncf	bit_position, F, A  ; shifts bit position up
+				    ; new bit position: 0 0 0 1 0 0 0 0
+	clrf	on_cycles	    ; clears the number of on cycles recorded
+
+	return
+	
+encodeDot:  ;	dots are encoded as 0
+				    ; encoded byte is 00h at the start - no need to set bits to be 0
+	rlncf	bit_position, F, A  ; shifts bit position up
+	clrf	on_cycles	    ; clears the number of on cycles recorded
 	
 	return
-
-enc_dash:
-	movf	bit_pos, W, A
-	xorwf	enc_byte, F, A
-	rlncf	bit_pos, F, A
-	clrf	on_cycles
-
 	
-	return
-enc_dot:
+finishEncoding:
 
-	rlncf	bit_pos, F, A
-	clrf	on_cycles
-	return
-	
-enc_finish:
-
-;   move encoded byte to Wreg
-	call	encrypt
-	call	reset_vals
+	call	Encrypt		; calls encryption and UART sending function
+	call	ResetValues	; resets relavent values for new character input
 	return
 end	rst
 
