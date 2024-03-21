@@ -1,7 +1,9 @@
 #include <xc.inc>
-extrn	StringSetup, StringToLCD	; from string
-extrn	UARTTransmitByte, byte_higher, UARTClearBytes   ; from UART
-extrn	LCDClear, LCDSecondLine, LCDSendByteData, DelayMS	; from LCD
+extrn	RNG_counter
+extrn	StringSetup, StringToLCD			    ; from string
+extrn	UARTTransmitByte, byte_higher, UARTClearBytes	    ; from UART
+extrn	LCDClear, LCDSecondLine, LCDSendByteData, DelayMS   ; from LCD
+    
 
 global	ConnectSetup, GetConnection
 psect	udata_acs
@@ -45,12 +47,14 @@ receivedFF:
 	call	LCDSendByteData
 	movlw	0x3E		    ; >>
 	call	LCDSendByteData
-	movlw	0xFF		    ; waits 100ms
+	movlw	0xFF		    ; waits 255ms
 	call	DelayMS
 	movlw	0x0F
 	call	UARTTransmitByte    ; send confirmation byte
 	
 check0x0F:
+	movlw	100		    ; waits 100ms
+	call	DelayMS
 	movlw	0x0F
 ;   received connection confirmation byte? (F0 0F?) 
 	cpfseq	byte_higher, A
@@ -85,12 +89,7 @@ check0x0F:
 	call	DelayMS
 	movlw	0xFF		    ; waits 255ms
 	call	DelayMS
-	movlw	0xFF		    ; waits 255ms
-	call	DelayMS
-	movlw	0xFF		    ; waits 255ms
-	call	DelayMS
-	movlw	0xFF		    ; waits 255ms
-	call	DelayMS
+	
 	call	LCDClear
 	call	UARTClearBytes
 	return
