@@ -39,9 +39,9 @@ start:	;   calls all module setups and goes to main loop
 	call	BuzzerSetup
 	call	UARTSetup
 	call	ResetValues
-	call	ConnectSetup
-	call	BuzzerStop
-	call	GetConnection
+	;call	ConnectSetup
+	;call	BuzzerStop
+	;call	GetConnection
 	goto	loop
 	
 loop:	;   main loop
