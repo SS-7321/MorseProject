@@ -1,9 +1,10 @@
 #include <xc.inc>
-;editted
-global	ButtonDecodeA, cursor_counter, ButtonToLCD, DecodeSetup, Decrypt
-extrn	byte_higher, byte_lower	; bytes from UART
-extrn	LCDSendByteData, LCDClear, LCDSecondLine, LCDFirstLine
-extrn	key
+    
+extrn	byte_higher, byte_lower, key	; external variables
+extrn	LCDSendByteData, LCDClear, LCDSecondLine, LCDFirstLine	; external functions
+    
+global	ButtonDecodeA, ButtonToLCD, DecodeSetup	    ; global functions
+
 
 psect	udata_acs   ; reserve data space in access ram
 cursor_counter:	ds 1
