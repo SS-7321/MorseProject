@@ -35,6 +35,9 @@ int_hi:	org	0x0008	; high vector, no low vector
 	return
 	
 start:	;   calls all module setups and goes to main loop
+	movlw	0x64
+	movwf	key, A
+	call	UARTClearBytes
         call	ButtonSetup
 	call	DecodeSetup
 	call	LCDSetup
