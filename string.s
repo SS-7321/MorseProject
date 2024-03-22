@@ -1,7 +1,7 @@
 #include <xc.inc>
-extrn	LCDClear, LCDWriteMessage, LCDSecondLine
+extrn	LCDClear, LCDWriteMessage, LCDSecondLine    ; external functions
     
-global	StringSetup, StringToLCD
+global	StringSetup, StringToLCD    ; global functions
 
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 StringSpace:    ds 0x80 ; reserve 128 bytes for message data
