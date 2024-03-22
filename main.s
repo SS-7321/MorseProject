@@ -1,12 +1,17 @@
 #include <xc.inc>
-
-extrn	button, ButtonSetup, ButtonReadCycle	; from button
+;   external functions
+extrn	ButtonSetup, ButtonReadCycle		; from button
 extrn	LCDSetup				; from LCD
 extrn	ButtonToLCD, DecodeSetup		; from decode
-extrn	EncryptSetup, Encrypt, RNG_counter	; from encryption
+extrn	EncryptSetup, Encrypt			; from encryption
 extrn	BuzzerSetup, BuzzerStart, BuzzerStop	; from buzzer
-extrn	UARTInterrupt, UARTSetup, byte_higher, UARTClearBytes   ; from UART
+extrn	UARTInterrupt, UARTSetup, UARTClearBytes   ; from UART
 extrn	ConnectSetup, GetConnection
+    
+;   external variables
+extrn	button		; from button
+extrn	RNG_counter	; from encryption
+extrn	byte_higher	; from UART
     
 global	key, encoded_byte
     
@@ -30,8 +35,6 @@ int_hi:	org	0x0008	; high vector, no low vector
 	return
 	
 start:	;   calls all module setups and goes to main loop
-	movlw	0x65
-	movwf	key, A
         call	ButtonSetup
 	call	DecodeSetup
 	call	LCDSetup
@@ -39,9 +42,9 @@ start:	;   calls all module setups and goes to main loop
 	call	BuzzerSetup
 	call	UARTSetup
 	call	ResetValues
-	;call	ConnectSetup
-	;call	BuzzerStop
-	;call	GetConnection
+	call	ConnectSetup
+	call	BuzzerStop
+	call	GetConnection
 	goto	loop
 	
 loop:	;   main loop
