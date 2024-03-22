@@ -1,8 +1,11 @@
 #include <xc.inc>
 
-extrn	key, encoded_byte
-extrn	UARTTransmitByte
-global	encrypted_byte_lower, encrypted_byte_higher, EncryptSetup, Encrypt, RNG_counter
+extrn	key, encoded_byte   ;	external variables
+extrn	UARTTransmitByte    ;	external funcions
+    
+    
+global	encrypted_byte_lower, encrypted_byte_higher, RNG_counter, random_byte, MT_coefficient    ; global variables
+global	EncryptSetup, Encrypt, MersenneTwister	; global functions
 
 psect	udata_acs
 RNG_counter:	ds  1
