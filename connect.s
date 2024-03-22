@@ -10,7 +10,7 @@ extrn	key, byte_higher, byte_lower, RNG_counter, random_byte, MT_coefficient
    
     
 global	ConnectSetup, GetConnection	; global functions
-psect	udata_acs
+PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 time_counter:	ds 1
 	
 psect	connect_code,class=CODE
@@ -34,7 +34,7 @@ GetConnection:
 	movlw	0x3E		    ; >>
 	call	LCDSendByteData
 check0xFF:
-	incf	RNG_counter, F, A
+	incf	RNG_counter, F, A   ; generates random number
 	call	MersenneTwister
 	movlw	0xFF
 	call	UARTTransmitByte    ; transmit byte to check for connection
@@ -48,7 +48,7 @@ check0xFF:
 	goto	check0xFF
 
 receivedFF:
-	incf	RNG_counter, F, A
+	incf	RNG_counter, F, A   ; waits for a random number of ms
 	call	MersenneTwister
 	movff	random_byte, MT_coefficient
 	movlw	0x32		    ; 2
@@ -66,7 +66,7 @@ receivedFF:
 	call	MersenneTwister
 	
 check0x0F:
-	movlw	0xFF		    ; waits 255ms
+	movlw	0xFF		    ; waits a random number of ms
 	call	DelayMS
 	movf	random_byte, W, A
 	call	DelayMS
@@ -89,21 +89,22 @@ check0x0F:
 	
 sendKey:
 	
-	call	MersenneTwister
+	call	MersenneTwister	    ; waits a random number of ms
 	movlw	4
 	addwf	random_byte, W, A
 	call	DelayMS
 	
-	movff	random_byte, key
-	movf	random_byte, W, A
+	movff	random_byte, byte_higher    ; random number generated --> key
+	movf	random_byte, W, A	    ; send the random key via UART
 	call	UARTTransmitByte
 	movf	random_byte, W, A
 	call	UARTTransmitByte
 	
-	movlw	0xFF
+	movlw	0xFF		    ; waits 255ms
 	call	DelayMS
 	
-	movff	byte_higher, key
+	movff	byte_higher, key    ; received byte --> key
+	
 	movlw	0x34		    ; 4
 	call	LCDSendByteData
 	
@@ -113,6 +114,6 @@ timeDelay:
 	decfsz	time_counter, A
 	goto	timeDelay
 	
-	call	LCDClear
+	call	LCDClear	    ; clears LCD and received byte addresses
 	call	UARTClearBytes
 	return
