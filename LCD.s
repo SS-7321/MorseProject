@@ -1,6 +1,6 @@
 #include <xc.inc>
 
-global  LCDSetup, LCDWriteMessage, LCDClear, LCDSecondLine, LCDSendByteData, LCDWriteHex, LCDFirstLine, DelayMS
+global  LCDSetup, LCDWriteMessage, LCDClear, LCDSecondLine, LCDSendByteData, LCDFirstLine, DelayMS  ; gobal functions
 
 psect	udata_acs   ; named variables in access ram
 LCD_counter_lower:	ds 1	; reserve 1 byte for variable LCD_counter_lower
