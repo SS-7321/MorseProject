@@ -106,7 +106,7 @@ cycleIsOff:
 
 checkOffLength:
 ;   is pause long enough for new character?
-	movlw	10  ; new character after 10x20ms
+	movlw	10  ; new character after 10x6microsec
 	cpfsgt	off_cycles, A
 ;   if not long enough:
 	return	    ; return if not a new character
@@ -131,7 +131,7 @@ wrap:
 	
 checkOnLength:
 ;   is previous input long enough to be a space (empty character)?
-	movlw	20		    ; space if pressed for 20x20ms
+	movlw	20		    ; space if pressed for 20x6microsec
 	cpfsgt	on_cycles, A
 ;   if not long enough to be a space: (must be a dot or a dash)	
 	goto	dotOrDash
@@ -142,7 +142,7 @@ checkOnLength:
 	
 dotOrDash:
 ;   is previous input long enough to be a dash?    
-	movlw	8      ; dash if 8 cycles long (8x20ms)
+	movlw	8      ; dash if 8 cycles long (8x6microsec)
 	cpfsgt	on_cycles, A
 ;   if not long enough: (must be a dot)	
 	goto	encodeDot
