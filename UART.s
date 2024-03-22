@@ -1,5 +1,6 @@
 #include <xc.inc>
-global  UARTSetup, UARTTransmitByte, byte_higher, byte_lower, UARTInterrupt, UARTClearBytes
+global  UARTSetup, UARTTransmitByte, UARTInterrupt, UARTClearBytes ; global functions
+global  byte_higher, byte_lower	; global variables
 
 psect	udata_acs   ; reserve data space in access ram
 UART_counter:	ds  1	    ; reserve 1 byte for variable UART_counter
