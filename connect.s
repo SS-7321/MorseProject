@@ -114,6 +114,6 @@ timeDelay:
 	decfsz	time_counter, A
 	goto	timeDelay
 	
-	call	LCDClear	    ; clears LCD and received byte addresses
+	call	LCDClear	    ; clears LCD and received byte addresses                   
 	call	UARTClearBytes
 	return
