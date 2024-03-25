@@ -2,8 +2,8 @@ import serial
 
 def main():
     # COM port configuration
-    port1_name = 'port1'
-    port2_name = 'port2'
+    port1_name = 'COM5'
+    port2_name = 'COM6'
     baud_rate = 9600  # Change according to your device configuration
 
     try:
