@@ -3,10 +3,10 @@
 extrn	StringSetup, StringToLCD	    ; from string
 extrn	UARTTransmitByte, UARTClearBytes    ; from UART
 extrn	LCDClear, LCDSecondLine, LCDSendByteData, DelayMS   ; from LCD
-extrn	MersenneTwister	    ; from encryption
+extrn	LCG	    ; from encryption
     
 ;   external variables
-extrn	key, byte_higher, byte_lower, RNG_counter, random_byte, MT_coefficient
+extrn	key, byte_higher, byte_lower, RNG_counter, random_byte, LCG_coefficient
    
     
 global	ConnectSetup, GetConnection	; global functions
@@ -35,7 +35,7 @@ GetConnection:
 	call	LCDSendByteData
 check0xFF:
 	incf	RNG_counter, F, A   ; generates random number
-	call	MersenneTwister
+	call	LCG
 	movlw	0xFF
 	call	UARTTransmitByte    ; transmit byte to check for connection
 	movlw	100		    ; waits 100ms
@@ -48,9 +48,9 @@ check0xFF:
 	goto	check0xFF
 
 receivedFF:
-	incf	RNG_counter, F, A   ; waits for a random number of ms
-	call	MersenneTwister
-	movff	random_byte, MT_coefficient
+	incf	RNG_counter, F, A   ; generates random number to set as coeff for LCG
+	call	LCG
+	movff	random_byte, LCG_coefficient
 	movlw	0x32		    ; 2
 	call	LCDSendByteData
 	movlw	0x3E		    ; >>
@@ -63,7 +63,7 @@ receivedFF:
 	call	DelayMS
 	movlw	0x0F
 	call	UARTTransmitByte    ; send confirmation byte
-	call	MersenneTwister
+	call	LCG
 	
 check0x0F:
 	movlw	0xFF		    ; waits a random number of ms
@@ -71,7 +71,7 @@ check0x0F:
 	movf	random_byte, W, A
 	call	DelayMS
 	movlw	0x0F
-;   received connection confirmation byte? (F0 0F?) 
+;   received connection confirmation byte? (0F 0F?) 
 	cpfseq	byte_higher, A
 ;   if not received:
 	goto	check0x0F
@@ -89,7 +89,7 @@ check0x0F:
 	
 sendKey:
 	
-	call	MersenneTwister	    ; waits a random number of ms
+	call	LCG	    ; waits a random number of ms
 	movlw	4
 	addwf	random_byte, W, A
 	call	DelayMS
