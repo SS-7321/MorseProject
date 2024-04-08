@@ -325,11 +325,11 @@ Decrypt:
 	xorwf	byte_higher, f, a	; takes XOR of the two bytes
 	movlw	0x10
 	mulwf	byte_higher, a		; splits the higher byte
-	movff	PRODL, decrypted_byte	; only takes the lower byte
+	movff	PRODL, decrypted_byte	; only takes the lower nibble
 	
 	movlw	0x10
 	mulwf	byte_lower, a		; splits the lower byte
-	movf	PRODH, W, A		; only takes the higher byte
+	movf	PRODH, W, A		; only takes the higher nibble
 	addwf	decrypted_byte, F, A	; adds the two values to form decrypted byte
 	movf	key, W, A
 	xorwf	decrypted_byte, F, A	; XOR decrypted byte with predefined key
