@@ -305,7 +305,7 @@ ButtonToLCD:
 	call	Decrypt
 	call	ButtonDecodeA
 	call	LCDSendByteData
-	incf	cursor_counter, f, a	; increase cursor position
+	incf	cursor_counter, f, a	; increase cursor position counter
 	movlw	0x10
 	cpfseq	cursor_counter, a	; checks if cursor is at the end of 1st line
 	goto	writeCharacter
