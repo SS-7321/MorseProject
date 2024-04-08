@@ -4,12 +4,12 @@ extrn	key, encoded_byte   ;	external variables
 extrn	UARTTransmitByte    ;	external funcions
     
     
-global	encrypted_byte_lower, encrypted_byte_higher, RNG_counter, random_byte, MT_coefficient    ; global variables
-global	EncryptSetup, Encrypt, MersenneTwister	; global functions
+global	encrypted_byte_lower, encrypted_byte_higher, RNG_counter, random_byte, LCG_coefficient    ; global variables
+global	EncryptSetup, Encrypt, LCG	; global functions
 
 psect	udata_acs
 RNG_counter:	ds  1
-MT_coefficient:	ds  1
+LCG_coefficient:	ds  1
 random_byte:	ds  1
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
@@ -25,7 +25,7 @@ EncryptSetup:
 	movlw   0xA0
 	movwf   RNG_counter
 	movlw   0x04
-	movwf   MT_coefficient, A
+	movwf   LCG_coefficient, A
 	
 
 EncryptReset:
@@ -34,12 +34,12 @@ EncryptReset:
 	clrf	encrypted_byte_lower
 	return
 	
-MixRandomBytes:	;   mix encoded byte and rnadom number
+MixRandomBytes:	;   mix encoded byte and random number
 		;   example - random: FA and encoded byte: EB
 		;   final mixed bytes are FE BA
 	movlw	0x0F			    ; Filter A from FA as OA
 	andwf	random_byte, W, A	    ;   
-	movwf	encrypted_byte_lower, A	    ; moves OA to lower Encrypted byte (encrypted_byte_lower)
+	movwf	encrypted_byte_lower, A	    ; move OA to lower Encrypted byte (encrypted_byte_lower)
 	
 	movlw	0xF0			    ; filter F from FA as F0
 	andwf	random_byte, W, A	    ;
@@ -59,10 +59,10 @@ XORLowHigh:	;   XOR FE with BA and saves it in place of FE
 	xorwf	encrypted_byte_higher, F, A
 	return
 	
-MersenneTwister:    ;	simple mersenne twister algorithm of modulus 255 (FFh)
-	movf	MT_coefficient, W, A
+LCG:    ;	simple linear congruential generator algorithm of modulus 255 (FFh)
+	movf	LCG_coefficient, W, A
 	mulwf	random_byte, A
-	movff	PRODL, random_byte
+	movff	PRODL, random_byte  ; only uses lower byte of product
 	movf	RNG_counter, W, A   ; counter determined by previous number of on cycles
 	addwf	random_byte, F, A
 	return
@@ -72,7 +72,7 @@ Encrypt:
 	movf	key, W, A		    ; XOR encoded byte with predefined key
 	xorwf	encoded_byte, F, A
 	call	EncryptReset		    ; resets relevant variables
-	call	MersenneTwister		    ; uses mersenne twister algorithm to generate a random byte
+	call	LCG		    	    ; uses LCG algorithm to generate a random byte
 	call	MixRandomBytes		    ; fills random byte around encoded byte
 	call	XORLowHigh		    ; XORs the higher and lower byte
 
