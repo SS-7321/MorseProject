@@ -158,19 +158,14 @@ encodeDash: ;	dashes are encoded as 1
 				    ; bit position:	0 0 0 0 1 0 0 0
 				    ; XOR above bytes----------------------
 				    ; new encoded byte: 0 0 0 0 1 1 0 1
-				    
+encodeDot:  ;	dots are encoded as 0
+				    ; encoded byte is 00h at the start - no need to set bits to be 0
 	rlncf	bit_position, F, A  ; shifts bit position up
 				    ; new bit position: 0 0 0 1 0 0 0 0
 	clrf	on_cycles	    ; clears the number of on cycles recorded
 
 	return
-	
-encodeDot:  ;	dots are encoded as 0
-				    ; encoded byte is 00h at the start - no need to set bits to be 0
-	rlncf	bit_position, F, A  ; shifts bit position up
-	clrf	on_cycles	    ; clears the number of on cycles recorded
-	
-	return
+
 	
 finishEncoding:
 
