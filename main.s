@@ -90,7 +90,7 @@ CheckCycle:
 cycleIsOn:
 	call	BuzzerStart	    ; starts buzzer sound
 	incf	on_cycles	    ; increases number of on cycles recorded
-	incf	RNG_counter	    ; increments a variable for mersenne twister
+	incf	RNG_counter	    ; increments a variable for LCG
 	clrf	off_cycles	    ; clears number of off cycles recorded
 	setf	boolean_do_send, A  ; sets the encoding boolean to be true
 	return
