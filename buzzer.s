@@ -5,7 +5,7 @@ global  BuzzerSetup, BuzzerStart, BuzzerStop
 
 psect	buzzer_code,class=CODE
 
-BuzzerSetup:	;   sets up CCP8 module to be a PWM of 2.44Hz
+BuzzerSetup:	;   sets up CCP8 module to be a PWM of 2.44kHz
 	bsf	TRISB, 6, A
 	clrf	TRISE, A    ; outputs PWM signal to PORT E pin 4
 	clrf	CCPTMRS2
