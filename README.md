@@ -40,7 +40,7 @@ Morse code has historically played a crucial role in military, maritime, and avi
 <!-- Summarize the core architecture or conceptual blueprint of the product. -->
 
 <figure>
-  <img src="./imgs/process.png" alt="Process Diagram">
+  <img src="./img/process.png" alt="Process Diagram">
   <figcaption>Figure 1: Block diagram of Morse Communication Device, showing complexity gradient from left to right and temporal progression from top to bottom. Coloured outlines indicate  various modules’ files. The diagram includes the main loop (dashed box) for repetitive execution
 and the interrupt service routine (ISR) for UART Rx interrupts (dotted box).</figcaption>
 </figure>
