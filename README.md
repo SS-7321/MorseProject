@@ -212,7 +212,7 @@ Since the button only had two channels, it can only be used for connecting one c
 
 ### Wireless transmission
 
-Using a Wi-Fi adaptor and driver to connect to a router and transmit bytes through the internet will increase the portability and mobility of the device, albeit increasing the latency. For accessibility across various situations, both UART and Wi-Fi should be available on the
+Using a Wi-Fi adaptor and driver to connect to a router and transmit bytes through the internet will increase the portability and mobility of the device, albeit increasing the latency. For accessibility across various situations, both UART and Wi-Fi should be available on the device.
 
 ---
 
